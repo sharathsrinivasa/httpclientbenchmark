@@ -68,7 +68,7 @@ public class ReactorNettyHCPerformanceTests {
         }
     }
 
-    @Test(invocationCount = 200, threadPoolSize = 100, priority = 0)
+    @Test(invocationCount = 200, threadPoolSize = 100, priority = 1)
     public void warmupBlocking() {
         //using blocking requests here
         String uuid = UUID.randomUUID().toString();
@@ -86,24 +86,6 @@ public class ReactorNettyHCPerformanceTests {
     }
 
     @Test(priority = 2)
-    public void testBlockingGET() {
-        for (int i = 0; i < EXECUTIONS; i++){
-            String uuid = UUID.randomUUID().toString();
-
-            HttpClient.RequestSender requestSender = reactorNettyClient
-                    .request(HttpMethod.GET)
-                    .uri(echoURL(uuid));
-
-            try {
-                String result = executeSync(requestSender);
-                assertEquals(result, echoEndpointResponse);
-            } catch(Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
-
-    @Test(priority = 3)
     public void testNonBlockingGET() {
         logger.info("testNonBlockingGET start");
         CountDownLatch latcher = new CountDownLatch(EXECUTIONS);

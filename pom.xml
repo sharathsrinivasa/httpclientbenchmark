@@ -29,13 +29,8 @@
             </dependency>
             <dependency>
                 <groupId>io.projectreactor</groupId>
-                <artifactId>reactor-core</artifactId>
-                <version>${reactor.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-test</artifactId>
-                <version>${reactor.version}</version>
+                <version>3.2.0.RELEASE</version>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
