@@ -8,6 +8,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
+import reactor.test.StepVerifier;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
@@ -36,7 +37,7 @@ public class ReactorNettyHCPerformanceTests {
 
     private final String ECHO_DELAY_BASE_URL = "/echodelayserv/echo/";
 
-    private static final int EXECUTIONS = 100000;
+    private static final int EXECUTIONS = 10000;
 
     HttpClient reactorNettyClient;
 
@@ -68,22 +69,41 @@ public class ReactorNettyHCPerformanceTests {
         }
     }
 
-    @Test(invocationCount = 200, threadPoolSize = 100, priority = 1)
-    public void warmupBlocking() {
+    @Test(priority = 1)
+    public void blockingGET() {
         //using blocking requests here
         String uuid = UUID.randomUUID().toString();
 
-        HttpClient.RequestSender requestSender = reactorNettyClient
-                .request(HttpMethod.GET)
-                .uri(echoURL(uuid));
+        for (int i = 0; i < EXECUTIONS; i++) {
+            HttpClient.RequestSender requestSender = reactorNettyClient
+                    .request(HttpMethod.GET)
+                    .uri(echoURL(uuid));
 
-        try {
-            String result = executeSync(requestSender);
-            assertEquals(result, echoEndpointResponse);
-        } catch(Exception ex) {
-            ex.printStackTrace();
+            try {
+                String result = executeSync(requestSender);
+                assertEquals(result, echoEndpointResponse);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
+
+    @Test(invocationCount = EXECUTIONS, threadPoolSize = 100)
+    public void multiThreadedBlockingGET() {
+        String uuid = UUID.randomUUID().toString();
+
+            HttpClient.RequestSender requestSender = reactorNettyClient
+                    .request(HttpMethod.GET)
+                    .uri(echoURL(uuid));
+
+            try {
+                String result = executeSync(requestSender);
+                assertEquals(result, echoEndpointResponse);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+    }
+
 
     @Test(priority = 2)
     public void testNonBlockingGET() {
@@ -96,8 +116,10 @@ public class ReactorNettyHCPerformanceTests {
                     .request(HttpMethod.GET)
                     .uri(echoURL(uuid));
 
-            executeAsync(requestSender, latcher, i)
-            .subscribe(s -> {});
+           StepVerifier
+                   .create(executeAsync(requestSender, latcher, i))
+                   .assertNext(s -> assertEquals(s, echoEndpointResponse))
+                   .verifyComplete();
         }
         try {
             latcher.await();

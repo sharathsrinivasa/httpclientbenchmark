@@ -25,9 +25,8 @@ hs_err_pid*
 target/
 test-output/
 
-# IDE Files #
- .classpath
- .project
- .settings/
- .idea/*
- *.iml
+.classpath
+.project
+.settings/
+.idea
+*.iml
