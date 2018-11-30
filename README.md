@@ -1,7 +1,7 @@
 # Issue
 This is an attempt to reproduce the issue mentioned [here](https://github.com/reactor/reactor-netty/issues/413) in reactor netty. 
 
-Reproducibility : Intermittent.
+Reproducibility : If you are using testng's threadpool and performing HTTPClient call, I could see Connection prematurely closed BEFORE response.
 
 # mockapplication
 mockapplication is a wiremock based application for stubbing http client benchmark use cases.
