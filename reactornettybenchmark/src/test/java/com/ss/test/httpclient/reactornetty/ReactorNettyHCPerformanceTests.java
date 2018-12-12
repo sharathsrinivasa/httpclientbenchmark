@@ -1,167 +1,99 @@
 package com.ss.test.httpclient.reactornetty;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.timeout.ReadTimeoutHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.profile.GCProfiler;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
-import reactor.test.StepVerifier;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import static org.testng.Assert.assertEquals;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 /**
  * @author sharath.srinivasa
  */
-@Test
+@Fork(1)
+@Measurement(iterations = 2)
+@Warmup(iterations = 2)
+@BenchmarkMode(Mode.SampleTime)
+@OutputTimeUnit(TimeUnit.MICROSECONDS)
+@Threads(16)
 public class ReactorNettyHCPerformanceTests {
+    private static final String ECHO_DELAY_BASE_URL = "/echodelayserv/echo/";
+    private static final String BASE_URL = "http://localhost:8080";
 
-    private static final String echoEndpointResponse = " {\n" +
-            "        \"path\": \"chivas\",\n" +
-            "                \"planned-delay\": 464,\n" +
-            "                \"real-delay\": 458\n" +
-            "        }";
+    @State(Scope.Benchmark)
+    public static class ReactorNettyState {
+        private HttpClient client;
+        private WireMockServer wireMockServer;
 
-    private static final Logger logger = LoggerFactory.getLogger(ReactorNettyHCPerformanceTests.class);
+        @Setup(Level.Trial)
+        public void setup() {
+            client = HttpClient.create(ConnectionProvider.fixed("benchmark", 200))
+                    .baseUrl(BASE_URL)
+                    .tcpConfiguration(tcpClient -> tcpClient.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 500)
+                            .doOnConnected(con -> con.addHandlerLast(new ReadTimeoutHandler(500, TimeUnit.MILLISECONDS))));
 
-    private final String ECHO_DELAY_BASE_URL = "/echodelayserv/echo/";
+            int cpus = Runtime.getRuntime().availableProcessors();
 
-    private static final int EXECUTIONS = 10000;
+            WireMockConfiguration config = WireMockConfiguration.wireMockConfig()
+                    .port(8080)
+                    .httpsPort(9443)
+                    .disableRequestJournal()
+                    .containerThreads(200)
+                    .jettyAcceptQueueSize(10)
+                    .jettyAcceptors(cpus);
 
-    HttpClient reactorNettyClient;
+            wireMockServer = new WireMockServer(config);
+            wireMockServer.stubFor(
+                    get(urlMatching("/echodelayserv/echo/.*")).willReturn(aResponse().withStatus(200)
+                            .withHeader("Content-Type", "plain/text")
+                            .withBody("doesnotmatter")));
+            wireMockServer.start();
+        }
 
-    AtomicInteger count = new AtomicInteger(0);
-    private Set<CountDownLatch> latches = new HashSet<>();
-    private Lock lock = new ReentrantLock();
-
-    @BeforeTest
-    public void initializeTest() {
-        // build client instance
-        reactorNettyClient = setupReactorNettyHttpClient(this.getBaseUrl());
-    }
-
-    // accepts a baseUrl as input and returns an instance of HttpClient
-    private HttpClient setupReactorNettyHttpClient(String baseUrl) {
-        return HttpClient
-                .create(ConnectionProvider.fixed("benchmark", 200))
-                .baseUrl(baseUrl)
-                .tcpConfiguration(tcpClient ->
-                        tcpClient.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 500)
-                                 .doOnConnected( con -> con.addHandlerLast(new ReadTimeoutHandler(500, TimeUnit.MILLISECONDS)))
-                );
-    }
-
-
-    private String getBaseUrl() {
-        return "http://localhost:8080";
-    }
-
-    @AfterTest
-    public void finalizeTest(){
-        for (CountDownLatch latcher : latches) {
-            try {
-                latcher.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        @TearDown(Level.Trial)
+        public void tearDown() {
+            wireMockServer.stop();
         }
     }
 
-    @Test(priority = 1)
-    public void blockingGET() {
-        //using blocking requests here
-        String uuid = UUID.randomUUID().toString();
-
-        for (int i = 0; i < EXECUTIONS; i++) {
-            HttpClient.RequestSender requestSender = reactorNettyClient
-                    .request(HttpMethod.GET)
-                    .uri(echoURL(uuid));
-
-            try {
-                String result = executeSync(requestSender);
-                assertEquals(result, echoEndpointResponse);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+    @Benchmark
+    public void blockingGET(ReactorNettyState state) {
+        executeSync(state.client
+                .request(HttpMethod.GET)
+                .uri(echoURL()));
     }
 
-    @Test(invocationCount = EXECUTIONS, threadPoolSize = 100)
-    public void multiThreadedBlockingGET() {
-        String uuid = UUID.randomUUID().toString();
-
-            HttpClient.RequestSender requestSender = reactorNettyClient
-                    .request(HttpMethod.GET)
-                    .uri(echoURL(uuid));
-
-            try {
-                String result = executeSync(requestSender);
-                assertEquals(result, echoEndpointResponse);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+    @Benchmark
+    public void multiThreadedBlockingGET(ReactorNettyState state) {
+        executeSync(state.client
+                .request(HttpMethod.GET)
+                .uri(echoURL()));
     }
 
-
-    @Test(priority = 2)
-    public void testNonBlockingGET() {
-        logger.info("testNonBlockingGET start");
-        CountDownLatch latcher = new CountDownLatch(EXECUTIONS);
-        for (int i = 0; i < EXECUTIONS; i++) {
-            String uuid = UUID.randomUUID().toString();
-
-            HttpClient.RequestSender requestSender = reactorNettyClient
-                    .request(HttpMethod.GET)
-                    .uri(echoURL(uuid));
-
-           StepVerifier
-                   .create(executeAsync(requestSender, latcher, i))
-                   .assertNext(s -> assertEquals(s, echoEndpointResponse))
-                   .verifyComplete();
-        }
-        try {
-            latcher.await();
-        } catch (InterruptedException e) {
-            logger.error("hey, don't interrupt me!");
-            e.printStackTrace();
-        }
-        logger.info("testNonBlockingGET end");
+    @Benchmark
+    public void nonBlockingGET(ReactorNettyState state) {
+        executeAsync(state.client
+                .request(HttpMethod.GET)
+                .uri(echoURL()));
     }
 
-    public String executeSync(HttpClient.ResponseReceiver<?> request) {
-        return request
-                .responseSingle((res, body) -> {
-                    if (res.status().code() != 200) {
-                       Mono.error(new IllegalStateException("Unexpected response code : " + res.status().code()));
-                    }
-                    return body;
-                })
-                .map(byteBuf -> byteBuf.toString(StandardCharsets.UTF_8))
-                .block();
-    }
-
-    public Mono<String> executeAsync(
-            final HttpClient.ResponseReceiver<?> request,
-            final CountDownLatch latch,
-            final int counter
-    ) {
-        return request
+    private void executeSync(HttpClient.ResponseReceiver<?> request) {
+        request
                 .responseSingle((res, body) -> {
                     if (res.status().code() != 200) {
                         Mono.error(new IllegalStateException("Unexpected response code : " + res.status().code()));
@@ -169,15 +101,38 @@ public class ReactorNettyHCPerformanceTests {
                     return body;
                 })
                 .map(byteBuf -> byteBuf.toString(StandardCharsets.UTF_8))
-                .log()
-                .doOnTerminate(() -> {
-                    if (latch != null) latch.countDown();
-                })
-                .doOnError(throwable -> {
-                    logger.error("Failed : {}", counter);
-                    throwable.printStackTrace();
-                });
+                .block();
     }
 
-    protected String echoURL(String echophrase){return ECHO_DELAY_BASE_URL + "/" + echophrase;}
+    private void executeAsync(final HttpClient.ResponseReceiver<?> request) {
+        CountDownLatch latch = new CountDownLatch(1);
+        request
+                .responseSingle((res, body) -> {
+                    if (res.status().code() != 200) {
+                        Mono.error(new IllegalStateException("Unexpected response code : " + res.status().code()));
+                    }
+                    return body;
+                })
+                .map(byteBuf -> byteBuf.toString(StandardCharsets.UTF_8))
+                .doOnTerminate(latch::countDown)
+                .doOnError(Throwable::printStackTrace)
+                .block();
+        try {
+            latch.await(1, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String echoURL() {
+        return ECHO_DELAY_BASE_URL + "/" + UUID.randomUUID().toString();
+    }
+
+    public static void main(String[] args) throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(ReactorNettyHCPerformanceTests.class.getSimpleName())
+                .addProfiler(GCProfiler.class)
+                .build();
+        new Runner(opt).run();
+    }
 }
