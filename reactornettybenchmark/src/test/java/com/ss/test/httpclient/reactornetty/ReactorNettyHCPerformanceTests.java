@@ -1,6 +1,8 @@
 package com.ss.test.httpclient.reactornetty;
 
+import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterTest;
@@ -8,13 +10,16 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.resources.ConnectionProvider;
 import reactor.test.StepVerifier;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -47,12 +52,21 @@ public class ReactorNettyHCPerformanceTests {
 
     @BeforeTest
     public void initializeTest() {
-
         // build client instance
-        reactorNettyClient = HttpClient
-                .create()
-                .baseUrl(this.getBaseUrl());
+        reactorNettyClient = setupReactorNettyHttpClient(this.getBaseUrl());
     }
+
+    // accepts a baseUrl as input and returns an instance of HttpClient
+    private HttpClient setupReactorNettyHttpClient(String baseUrl) {
+        return HttpClient
+                .create(ConnectionProvider.fixed("benchmark", 200))
+                .baseUrl(baseUrl)
+                .tcpConfiguration(tcpClient ->
+                        tcpClient.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 500)
+                                 .doOnConnected( con -> con.addHandlerLast(new ReadTimeoutHandler(500, TimeUnit.MILLISECONDS)))
+                );
+    }
+
 
     private String getBaseUrl() {
         return "http://localhost:8080";
