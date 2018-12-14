@@ -30,6 +30,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.ss.benchmark.httpclient.common.Payloads;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -197,7 +199,7 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
     public void testSimpleShorttoShortPost() throws Exception{
         TestSubscriber<HttpClientResponse<ByteBuf>> testsubscriber = new TestSubscriber<>();
         client.createPost(ECHO_DELAY_POST_SHORT_URL).addHeader("Content-Type", "application/json")
-                .writeStringContent(Observable.just(SHORT_JSON))
+                .writeStringContent(Observable.just(Payloads.SHORT_JSON))
                 .subscribe(testsubscriber);
         testsubscriber.awaitTerminalEvent();
         testsubscriber.assertNoErrors();
@@ -293,7 +295,7 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
         HttpClientRequest<ByteBuf, ByteBuf> request = client.createPost(ECHO_DELAY_POST_SHORT_URL);
         Timer.Context ctx = timer.time();
         try {
-            StringBuffer sb = executeBlockingObservable(request.writeStringContent(Observable.just(SHORT_JSON)));
+            StringBuffer sb = executeBlockingObservable(request.writeStringContent(Observable.just(Payloads.SHORT_JSON)));
             ctx.stop();
         } catch (Exception e) {
             ctx.stop();
@@ -309,7 +311,7 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
         HttpClientRequest<ByteBuf, ByteBuf> request = client.createPost(ECHO_DELAY_POST_LONG_URL);
         Timer.Context ctx = timer.time();
         try {
-            StringBuffer sb = executeBlockingObservable(request.writeStringContent(Observable.just(LONG_JSON)));
+            StringBuffer sb = executeBlockingObservable(request.writeStringContent(Observable.just(Payloads.LONG_JSON)));
             ctx.stop();
         } catch (Exception e) {
             ctx.stop();
@@ -325,7 +327,7 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
         Timer timer = getTimingTimer(this.getClass(), "testNonBlockingShortShortPOST");
         Counter errors = getErrorCounter(this.getClass(), "testNonBlockingShortShortPOST");
         for (int i = 0; i < EXECUTIONS; i++){
-            Observable<HttpClientResponse<ByteBuf>> request = client.createPost(ECHO_DELAY_POST_SHORT_URL).writeStringContent(Observable.just(SHORT_JSON));
+            Observable<HttpClientResponse<ByteBuf>> request = client.createPost(ECHO_DELAY_POST_SHORT_URL).writeStringContent(Observable.just(Payloads.SHORT_JSON));
             executeAsync(request, timer, errors, latcher, i).subscribe();
         }
         try {
@@ -343,7 +345,7 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
         Timer timer = getTimingTimer(this.getClass(), "testNonBlockingShortLongPOST");
         Counter errors = getErrorCounter(this.getClass(), "testNonBlockingShortLongPOST");
         for (int i = 0; i < EXECUTIONS; i++){
-            Observable<HttpClientResponse<ByteBuf>> request = client.createPost(ECHO_DELAY_POST_LONG_URL).writeStringContent(Observable.just(SHORT_JSON));
+            Observable<HttpClientResponse<ByteBuf>> request = client.createPost(ECHO_DELAY_POST_LONG_URL).writeStringContent(Observable.just(Payloads.SHORT_JSON));
             executeAsync(request, timer, errors, latcher, i).subscribe();
         }
         try {
@@ -361,7 +363,7 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
         Timer timer = getTimingTimer(this.getClass(), "testNonBlockingLongShortPOST");
         Counter errors = getErrorCounter(this.getClass(), "testNonBlockingLongShortPOST");
         for (int i = 0; i < EXECUTIONS; i++){
-            Observable<HttpClientResponse<ByteBuf>> request = client.createPost(ECHO_DELAY_POST_SHORT_URL).writeStringContent(Observable.just(LONG_JSON));
+            Observable<HttpClientResponse<ByteBuf>> request = client.createPost(ECHO_DELAY_POST_SHORT_URL).writeStringContent(Observable.just(Payloads.LONG_JSON));
             executeAsync(request, timer, errors, latcher, i).subscribe();
         }
         try {
@@ -379,7 +381,7 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
         Timer timer = getTimingTimer(this.getClass(), "testNonBlockingLongLongPOST");
         Counter errors = getErrorCounter(this.getClass(), "testNonBlockingLongLongPOST");
         for (int i = 0; i < EXECUTIONS; i++){
-            Observable<HttpClientResponse<ByteBuf>> request = client.createPost(ECHO_DELAY_POST_LONG_URL).writeStringContent(Observable.just(LONG_JSON));
+            Observable<HttpClientResponse<ByteBuf>> request = client.createPost(ECHO_DELAY_POST_LONG_URL).writeStringContent(Observable.just(Payloads.LONG_JSON));
             executeAsync(request, timer, errors, latcher, i).subscribe();
         }
         try {
