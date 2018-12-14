@@ -3,6 +3,7 @@ package com.ss.benchmark;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.ss.benchmark.httpclient.common.BenchmarkCommon;
+import com.ss.benchmark.httpclient.common.Payloads;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -61,10 +62,10 @@ public class MockService {
     private void createEchoStubs(){
 
         wireMockServer.stubFor(post(urlPathEqualTo("/echodelayserv/echo/long")).withRequestBody(containing("{"))
-                .willReturn(aResponse().withStatus(200).withBody(Payloads.LARGE_JSON).withHeader("Content-Type", "application/json")));
+                .willReturn(aResponse().withStatus(200).withBody(Payloads.LONG_JSON).withHeader("Content-Type", "application/json")));
 
         wireMockServer.stubFor(post(urlPathEqualTo("/echodelayserv/echo/short")).withRequestBody(containing("{"))
-                .willReturn(aResponse().withStatus(200).withBody(BenchmarkCommon.MICRO_JSON).withHeader("Content-Type", "application/json")));
+                .willReturn(aResponse().withStatus(200).withBody(Payloads.SHORT_JSON).withHeader("Content-Type", "application/json")));
 
         wireMockServer.stubFor(
                 get(urlPathEqualTo("/echodelayserv/delay/uniform"))
@@ -72,7 +73,7 @@ public class MockService {
 
         wireMockServer.stubFor(
                       get(urlMatching("/echodelayserv/echo/.*"))
-                      .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(BenchmarkCommon.RANDOM_ECHO_RESPONSE)));
+                      .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(Payloads.SHORT_JSON)));
 
     }
 

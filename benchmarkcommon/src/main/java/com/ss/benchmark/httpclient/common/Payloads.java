@@ -1,4 +1,4 @@
-package com.ss.benchmark;
+package com.ss.benchmark.httpclient.common;
 
 /**
  * Created by ssrinivasa on 12/13/18.
@@ -35,7 +35,9 @@ public class Payloads {
         return output.toString();
     }
 
-    public static final String LARGE_JSON = load("/large.json");
+    public static final String LONG_JSON = load("/long.json");
+
+    public static final String SHORT_JSON = load("/short.json");
 
 }
 

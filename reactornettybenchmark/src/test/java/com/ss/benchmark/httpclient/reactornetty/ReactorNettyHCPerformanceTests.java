@@ -3,6 +3,7 @@ package com.ss.benchmark.httpclient.reactornetty;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
 import com.ss.benchmark.httpclient.common.BenchmarkCommon;
+import com.ss.benchmark.httpclient.common.Payloads;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -102,7 +103,7 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
 
         StepVerifier
                 .create(responseVerifier)
-                .assertNext(s -> assertEquals(s, RANDOM_ECHO_RESPONSE ))
+                .assertNext(s -> assertEquals(s, Payloads.SHORT_JSON ))
                 .verifyComplete();
         logger.info("Completed testVanillaBlockingGET");
     }
@@ -114,7 +115,7 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
                 .headers(entries -> entries.add("Content-Type", "application/json" ))
                 .post()
                 .uri(ECHO_DELAY_POST_SHORT_URL)
-                .send(ByteBufFlux.fromString(Flux.just(SHORT_JSON)))
+                .send(ByteBufFlux.fromString(Flux.just(Payloads.SHORT_JSON)))
                 .response((res, responseBody) -> {
                     if (res.status().code() != 200) {
                         Mono.error(new IllegalStateException("Unexpected response code : " + res.status().code()));
@@ -125,7 +126,7 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
 
         StepVerifier
                 .create(responseVerifier)
-                .assertNext(s -> assertEquals(s, MICRO_JSON ))
+                .assertNext(s -> assertEquals(s, Payloads.SHORT_JSON ))
                 .verifyComplete();
     }
 
@@ -229,7 +230,7 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
         HttpClient.ResponseReceiver<?> requestSender = reactorNettyClient
                 .post()
                 .uri(ECHO_DELAY_POST_SHORT_URL)
-                .send(ByteBufFlux.fromString(Mono.just(SHORT_JSON)));
+                .send(ByteBufFlux.fromString(Mono.just(Payloads.SHORT_JSON)));
         Timer.Context ctx = timer.time();
         try {
             executeSync(requestSender);
@@ -249,7 +250,7 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
         HttpClient.ResponseReceiver<?> requestSender = reactorNettyClient
                 .post()
                 .uri(ECHO_DELAY_POST_LONG_URL)
-                .send(ByteBufFlux.fromString(Mono.just(LONG_JSON)));
+                .send(ByteBufFlux.fromString(Mono.just(Payloads.LONG_JSON)));
         Timer.Context ctx = timer.time();
         try {
             executeSync(requestSender);
@@ -270,7 +271,7 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
             HttpClient.ResponseReceiver<?> requestSender = reactorNettyClient
                     .post()
                     .uri(ECHO_DELAY_POST_SHORT_URL)
-                    .send(ByteBufFlux.fromString(Flux.just(SHORT_JSON)));
+                    .send(ByteBufFlux.fromString(Flux.just(Payloads.SHORT_JSON)));
             executeAsync(requestSender, timer, errors, latcher, i).subscribe();
         }
         try {
@@ -289,7 +290,7 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
             HttpClient.ResponseReceiver<?> requestSender = reactorNettyClient
                     .post()
                     .uri(ECHO_DELAY_POST_LONG_URL)
-                    .send(ByteBufFlux.fromString(Flux.just(SHORT_JSON)));
+                    .send(ByteBufFlux.fromString(Flux.just(Payloads.SHORT_JSON)));
             executeAsync(requestSender, timer, errors, latcher, i).subscribe();
         }
         try {
@@ -308,7 +309,7 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
             HttpClient.ResponseReceiver<?> requestSender = reactorNettyClient
                     .post()
                     .uri(ECHO_DELAY_POST_SHORT_URL)
-                    .send(ByteBufFlux.fromString(Flux.just(LONG_JSON)));
+                    .send(ByteBufFlux.fromString(Flux.just(Payloads.LONG_JSON)));
             executeAsync(requestSender, timer, errors, latcher, i).subscribe();
         }
         try {
@@ -327,7 +328,7 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
             HttpClient.ResponseReceiver<?> requestSender = reactorNettyClient
                     .post()
                     .uri(ECHO_DELAY_POST_LONG_URL)
-                    .send(ByteBufFlux.fromString(Mono.just(LONG_JSON)));
+                    .send(ByteBufFlux.fromString(Mono.just(Payloads.LONG_JSON)));
             executeAsync(requestSender, timer, errors, latcher, i).subscribe();
         }
         try {
