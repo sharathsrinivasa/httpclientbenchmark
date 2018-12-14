@@ -10,28 +10,13 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>reactornettybenchmark</artifactId>
-
-    <properties>
-        <reactornetty.version>0.8.3.RELEASE</reactornetty.version>
-        <reactor.version>3.2.2.RELEASE</reactor.version>
-    </properties>
+    <artifactId>rxnettybenchmark</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.ss.benchmark</groupId>
             <artifactId>benchmarkcommon</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.projectreactor.netty</groupId>
-            <artifactId>reactor-netty</artifactId>
-            <version>${reactornetty.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.projectreactor</groupId>
-            <artifactId>reactor-test</artifactId>
-            <version>${reactor.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
@@ -41,6 +26,11 @@
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.reactivex</groupId>
+            <artifactId>rxnetty-http</artifactId>
+            <version>0.5.2</version>
         </dependency>
     </dependencies>
 </project>

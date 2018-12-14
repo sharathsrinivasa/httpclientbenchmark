@@ -25,6 +25,7 @@ hs_err_pid*
 target/
 test-output/
 
+.DS*
 .classpath
 .project
 .settings/
