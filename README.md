@@ -1,23 +1,45 @@
 # Issue
 This is an attempt to compare performance between rxnetty and reactor netty http clients.
 
-# mockapplication
-mockapplication is a wiremock based application for stubbing http client benchmark use cases.
+# Building the common code
 
-# How to build 
-`mvn clean install` 
+This is the first thing you need to do.
 
-## IDE
-Run MockService 
-You could use mvn exec:java -pl mockapplication too.
+```sh
+mvn clean install
+``` 
 
-# Number of test runs
-By default, it is configured to 10000. 
+# Running a server the HTTP clients will hit
+The `mockapplication` module is a wiremock based application for stubbing http
+client benchmark use cases.  The HTTP clients under test will submit requests
+to this.
 
-# reactornettybenchmark
-Run test in ReactorNettyHCPerformanceTests
+To start the server:
 
-# rxnettybenchmark
-Run test in RxNettyPerformanceTests
+```sh
+mvn -pl mockapplication compile exec:java
+```
 
-## Issues Observed
+# Running the client load tests
+
+### reactor-netty
+
+```sh
+mvn -Pperformance -pl reactornettybenchmark verify
+```
+
+### rxnettybenchmark
+
+```sh
+mvn -Pperformance -pl rxnettybenchmark verify
+```
+
+# Configuration
+
+### Number of test runs
+
+By default, it is configured to 10,000. 
+
+# Issues Observed
+
+See github issues?

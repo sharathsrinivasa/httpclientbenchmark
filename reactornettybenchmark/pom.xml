@@ -15,7 +15,24 @@
     <properties>
         <reactornetty.version>0.8.3.RELEASE</reactornetty.version>
         <reactor.version>3.2.2.RELEASE</reactor.version>
+        <!--
+        <reactornetty.version>0.8.4.BUILD-SNAPSHOT</reactornetty.version>
+        <reactor.version>3.2.4.BUILD-SNAPSHOT</reactor.version>
+        -->
     </properties>
+
+    <repositories>
+        <repository>
+            <id>public</id>
+            <url>https://repo.spring.io/snapshot</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
