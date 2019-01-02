@@ -75,6 +75,9 @@ public class MockService {
                       get(urlMatching("/echodelayserv/echo/.*"))
                       .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(Payloads.SHORT_JSON)));
 
+        wireMockServer.stubFor(
+                get(urlMatching("/echodelayserv/echo/long"))
+                        .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(Payloads.LONG_JSON)));
     }
 
     private static String getProperty(String name, String defaultValue){
