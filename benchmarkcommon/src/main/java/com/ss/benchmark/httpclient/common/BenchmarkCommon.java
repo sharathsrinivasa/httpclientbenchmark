@@ -6,8 +6,8 @@ package com.ss.benchmark.httpclient.common;
 public class BenchmarkCommon extends MetricsHelper {
 
     public static final String ECHO_DELAY_BASE_URL = "/echodelayserv/echo";
-    public static final String ECHO_DELAY_POST_SHORT_URL = "/echodelayserv/echo/short";
-    public static final String ECHO_DELAY_POST_LONG_URL = "/echodelayserv/echo/long";
+    public static final String ECHO_DELAY_SHORT_URL = "/echodelayserv/echo/short";
+    public static final String ECHO_DELAY_LONG_URL = "/echodelayserv/echo/long";
     public static final String TEST_ENDPOINT = "/echodelayserv/echo/testmonkey";
     public static final String ECHO_DELAY_SETUP_FULL_URL = "/echodelayserv/delay/uniform?min=1ms&max=2ms";
 
@@ -15,7 +15,8 @@ public class BenchmarkCommon extends MetricsHelper {
     public static final int MAX_CONNECTION_POOL_SIZE = 200;
     public static final int CONNECTION_TTL = 60000;
     public static final int CONNECT_TIMEOUT = 500;
-    public static final int CONNECTION_REQUEST_TIMEOUT = 2000;
+    // set it as low as possible to make them same as rxnetty. AFAIK, there is no concept of connection acquire time in rxnetty.
+    public static final int CONNECTION_REQUEST_TIMEOUT = 1;
     public static final int READ_TIMEOUT = 2000;
 
     public static final int MIN_CONNECTION_POOL_SIZE = 100;

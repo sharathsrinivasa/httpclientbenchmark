@@ -198,7 +198,7 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
     @Test(priority =2)
     public void testSimpleShorttoShortPost() throws Exception{
         TestSubscriber<HttpClientResponse<ByteBuf>> testsubscriber = new TestSubscriber<>();
-        client.createPost(ECHO_DELAY_POST_SHORT_URL).addHeader("Content-Type", "application/json")
+        client.createPost(ECHO_DELAY_SHORT_URL).addHeader("Content-Type", "application/json")
                 .writeStringContent(Observable.just(Payloads.SHORT_JSON))
                 .subscribe(testsubscriber);
         testsubscriber.awaitTerminalEvent();
@@ -213,12 +213,12 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
     }
 
     @Test(priority =3)
-    public void testBlockingGET(){
-        Timer timer = getTimingTimer(this.getClass(), "testBlockingGET");
-        Counter errors = getErrorCounter(this.getClass(), "testBlockingGET");
+    public void testBlockingShortGET(){
+        Timer timer = getTimingTimer(this.getClass(), "testBlockingShortGET");
+        Counter errors = getErrorCounter(this.getClass(), "testBlockingShortGET");
         for (int i = 0; i < EXECUTIONS; i++){
             String uuid = UUID.randomUUID().toString();
-            HttpClientRequest<ByteBuf, ByteBuf> request = client.createGet(echoURL(uuid));
+            HttpClientRequest<ByteBuf, ByteBuf> request = client.createGet(ECHO_DELAY_SHORT_URL);
             Timer.Context ctx = timer.time();
             try {
                 StringBuffer sb = executeBlocking2(request);
@@ -232,12 +232,12 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
     }
 
     @Test(priority = 4)
-    public void testBlockingGETagain(){
-        Timer timer = getTimingTimer(this.getClass(), "testBlockingGETagain");
-        Counter errors = getErrorCounter(this.getClass(), "testBlockingGETagain");
+    public void testBlockingShortGETagain(){
+        Timer timer = getTimingTimer(this.getClass(), "testBlockingShortGETagain");
+        Counter errors = getErrorCounter(this.getClass(), "testBlockingShortGETagain");
         for (int i = 0; i < EXECUTIONS; i++){
             String uuid = UUID.randomUUID().toString();
-            HttpClientRequest<ByteBuf, ByteBuf> request = client.createGet(echoURL(uuid));
+            HttpClientRequest<ByteBuf, ByteBuf> request = client.createGet(ECHO_DELAY_SHORT_URL);
             Timer.Context ctx = timer.time();
             try {
                 StringBuffer sb = executeBlocking2(request);
@@ -251,14 +251,14 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
     }
 
     @Test(priority = 5)
-    public void testNonBlockingGET(){
-        System.out.println("testNonBlockingGET start");
+    public void testNonBlockingShortGET(){
+        System.out.println("testNonBlockingShortGET start");
         CountDownLatch latcher = new CountDownLatch(EXECUTIONS);
-        Timer timer = getTimingTimer(this.getClass(), "testNonBlockingGET");
-        Counter errors = getErrorCounter(this.getClass(), "testNonBlockingGET");
+        Timer timer = getTimingTimer(this.getClass(), "testNonBlockingShortGET");
+        Counter errors = getErrorCounter(this.getClass(), "testNonBlockingShortGET");
         for (int i = 0; i < EXECUTIONS; i++) {
             String uuid = UUID.randomUUID().toString();
-            HttpClientRequest<ByteBuf, ByteBuf> request = client.createGet(echoURL(uuid));
+            HttpClientRequest<ByteBuf, ByteBuf> request = client.createGet(ECHO_DELAY_SHORT_URL);
             executeAsync(request, timer, errors, latcher, i).subscribe(message -> {});
         }
         //make sure that we don't leave this benchmark without waiting for it to finish
@@ -268,7 +268,7 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
             System.out.println("hey, don't interrupt me!");
             e.printStackTrace();
         }
-        System.out.println("testNonBlockingGET end");
+        System.out.println("testNonBlockingShortGET end");
     }
 
     @Test(invocationCount = EXECUTIONS, threadPoolSize = 100, priority = 6)
@@ -292,7 +292,7 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
     public void testMultiThreadedBlockingShortShortPOST() {
         Timer timer = getTimingTimer(this.getClass(), "testMultiThreadedBlockingShortShortPOST");
         Counter errors = getErrorCounter(this.getClass(), "testMultiThreadedBlockingShortShortPOST");
-        HttpClientRequest<ByteBuf, ByteBuf> request = client.createPost(ECHO_DELAY_POST_SHORT_URL);
+        HttpClientRequest<ByteBuf, ByteBuf> request = client.createPost(ECHO_DELAY_SHORT_URL);
         Timer.Context ctx = timer.time();
         try {
             StringBuffer sb = executeBlockingObservable(request.writeStringContent(Observable.just(Payloads.SHORT_JSON)));
@@ -308,7 +308,7 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
     public void testMultiThreadedBlockingLongLongPOST() {
         Timer timer = getTimingTimer(this.getClass(), "testMultiThreadedBlockingLongLongPOST");
         Counter errors = getErrorCounter(this.getClass(), "testMultiThreadedBlockingLongLongPOST");
-        HttpClientRequest<ByteBuf, ByteBuf> request = client.createPost(ECHO_DELAY_POST_LONG_URL);
+        HttpClientRequest<ByteBuf, ByteBuf> request = client.createPost(ECHO_DELAY_LONG_URL);
         Timer.Context ctx = timer.time();
         try {
             StringBuffer sb = executeBlockingObservable(request.writeStringContent(Observable.just(Payloads.LONG_JSON)));
@@ -327,7 +327,7 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
         Timer timer = getTimingTimer(this.getClass(), "testNonBlockingShortShortPOST");
         Counter errors = getErrorCounter(this.getClass(), "testNonBlockingShortShortPOST");
         for (int i = 0; i < EXECUTIONS; i++){
-            Observable<HttpClientResponse<ByteBuf>> request = client.createPost(ECHO_DELAY_POST_SHORT_URL).writeStringContent(Observable.just(Payloads.SHORT_JSON));
+            Observable<HttpClientResponse<ByteBuf>> request = client.createPost(ECHO_DELAY_SHORT_URL).writeStringContent(Observable.just(Payloads.SHORT_JSON));
             executeAsync(request, timer, errors, latcher, i).subscribe();
         }
         try {
@@ -345,7 +345,7 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
         Timer timer = getTimingTimer(this.getClass(), "testNonBlockingShortLongPOST");
         Counter errors = getErrorCounter(this.getClass(), "testNonBlockingShortLongPOST");
         for (int i = 0; i < EXECUTIONS; i++){
-            Observable<HttpClientResponse<ByteBuf>> request = client.createPost(ECHO_DELAY_POST_LONG_URL).writeStringContent(Observable.just(Payloads.SHORT_JSON));
+            Observable<HttpClientResponse<ByteBuf>> request = client.createPost(ECHO_DELAY_LONG_URL).writeStringContent(Observable.just(Payloads.SHORT_JSON));
             executeAsync(request, timer, errors, latcher, i).subscribe();
         }
         try {
@@ -363,7 +363,7 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
         Timer timer = getTimingTimer(this.getClass(), "testNonBlockingLongShortPOST");
         Counter errors = getErrorCounter(this.getClass(), "testNonBlockingLongShortPOST");
         for (int i = 0; i < EXECUTIONS; i++){
-            Observable<HttpClientResponse<ByteBuf>> request = client.createPost(ECHO_DELAY_POST_SHORT_URL).writeStringContent(Observable.just(Payloads.LONG_JSON));
+            Observable<HttpClientResponse<ByteBuf>> request = client.createPost(ECHO_DELAY_SHORT_URL).writeStringContent(Observable.just(Payloads.LONG_JSON));
             executeAsync(request, timer, errors, latcher, i).subscribe();
         }
         try {
@@ -375,13 +375,56 @@ public class RxNettyPerformanceTests extends BenchmarkCommon {
     }
 
     @Test(priority = 12)
+    public void testBlockingLongGET(){
+        logger.info("testBlockingLongGET start");
+        Timer timer = getTimingTimer(this.getClass(), "testBlockingLongGET");
+        Counter errors = getErrorCounter(this.getClass(), "testBlockingLongGET");
+        for (int i = 0; i < EXECUTIONS; i++){
+            String uuid = UUID.randomUUID().toString();
+            HttpClientRequest<ByteBuf, ByteBuf> request = client.createGet(ECHO_DELAY_LONG_URL);
+            Timer.Context ctx = timer.time();
+            try {
+                StringBuffer sb = executeBlocking2(request);
+                ctx.stop();
+            } catch (Exception e) {
+                ctx.stop();
+                errors.inc();
+                e.printStackTrace();
+            }
+        }
+        logger.info("testBlockingLongGET end");
+    }
+
+    @Test(priority = 13)
+    public void testNonBlockingLongGET(){
+        logger.info("testNonBlockingLongGET start");
+        CountDownLatch latcher = new CountDownLatch(EXECUTIONS);
+        Timer timer = getTimingTimer(this.getClass(), "testNonBlockingLongGET");
+        Counter errors = getErrorCounter(this.getClass(), "testNonBlockingLongGET");
+        for (int i = 0; i < EXECUTIONS; i++) {
+            String uuid = UUID.randomUUID().toString();
+            HttpClientRequest<ByteBuf, ByteBuf> request = client.createGet(ECHO_DELAY_LONG_URL);
+            executeAsync(request, timer, errors, latcher, i).subscribe(message -> {});
+        }
+        //make sure that we don't leave this benchmark without waiting for it to finish
+        try {
+            latcher.await();
+        } catch (InterruptedException e) {
+            System.out.println("hey, don't interrupt me!");
+            e.printStackTrace();
+        }
+        System.out.println("testNonBlockingLongGET end");
+    }
+
+
+    @Test(priority = 14)
     public void testNonBlockingLongLongPOST(){
         System.out.println("starting testNonBlockingLongLongPOST");
         CountDownLatch latcher = new CountDownLatch(EXECUTIONS);
         Timer timer = getTimingTimer(this.getClass(), "testNonBlockingLongLongPOST");
         Counter errors = getErrorCounter(this.getClass(), "testNonBlockingLongLongPOST");
         for (int i = 0; i < EXECUTIONS; i++){
-            Observable<HttpClientResponse<ByteBuf>> request = client.createPost(ECHO_DELAY_POST_LONG_URL).writeStringContent(Observable.just(Payloads.LONG_JSON));
+            Observable<HttpClientResponse<ByteBuf>> request = client.createPost(ECHO_DELAY_LONG_URL).writeStringContent(Observable.just(Payloads.LONG_JSON));
             executeAsync(request, timer, errors, latcher, i).subscribe();
         }
         try {

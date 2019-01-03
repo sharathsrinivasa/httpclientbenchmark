@@ -53,7 +53,7 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
         reactorNettyClient = setupReactorNettyHttpClient(this.getBaseUrl());
     }
 
-    // TODO : use atomic interger rather than int in async execute
+    // TODO : use atomic integer rather than int in async execute
     @AfterTest
     public void finalizeTest(){
         for (CountDownLatch latcher : latches) {
@@ -114,7 +114,7 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
         Flux<String> responseVerifier = reactorNettyClient
                 .headers(entries -> entries.add("Content-Type", "application/json" ))
                 .post()
-                .uri(ECHO_DELAY_POST_SHORT_URL)
+                .uri(ECHO_DELAY_SHORT_URL)
                 .send(ByteBufFlux.fromString(Flux.just(Payloads.SHORT_JSON)))
                 .response((res, responseBody) -> {
                     if (res.status().code() != 200) {
@@ -131,9 +131,9 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
     }
 
     @Test(priority = 3)
-    public void testBlockingGET() {
-        Timer timer = getTimingTimer(this.getClass(), "testBlockingGET");
-        Counter errors = getErrorCounter(this.getClass(), "testBlockingGET");
+    public void testBlockingShortGET() {
+        Timer timer = getTimingTimer(this.getClass(), "testBlockingShortGET");
+        Counter errors = getErrorCounter(this.getClass(), "testBlockingShortGET");
         for (int i = 0; i < EXECUTIONS; i++){
             String uuid = UUID.randomUUID().toString();
 
@@ -155,17 +155,17 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
     }
 
     @Test(priority = 4)
-    public void testNonBlockingGET() {
-        logger.info("testNonBlockingGET start");
+    public void testNonBlockingShortGET() {
+        logger.info("testNonBlockingShortGET start");
         CountDownLatch latcher = new CountDownLatch(EXECUTIONS);
-        Timer timer = getTimingTimer(this.getClass(), "testNonBlockingGET");
-        Counter errors = getErrorCounter(this.getClass(), "testNonBlockingGET");
+        Timer timer = getTimingTimer(this.getClass(), "testNonBlockingShortGET");
+        Counter errors = getErrorCounter(this.getClass(), "testNonBlockingShortGET");
         for (int i = 0; i < EXECUTIONS; i++) {
             String uuid = UUID.randomUUID().toString();
 
             HttpClient.RequestSender requestSender = reactorNettyClient
                     .request(HttpMethod.GET)
-                    .uri(echoURL(uuid));
+                    .uri(ECHO_DELAY_SHORT_URL);
             executeAsync(requestSender, timer, errors, latcher, i)
                     .subscribe(s -> {});
         }
@@ -229,7 +229,7 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
         Counter errors = getErrorCounter(this.getClass(), "testMultiThreadedBlockingShortShortPOST");
         HttpClient.ResponseReceiver<?> requestSender = reactorNettyClient
                 .post()
-                .uri(ECHO_DELAY_POST_SHORT_URL)
+                .uri(ECHO_DELAY_SHORT_URL)
                 .send(ByteBufFlux.fromString(Mono.just(Payloads.SHORT_JSON)));
         Timer.Context ctx = timer.time();
         try {
@@ -249,7 +249,7 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
 
         HttpClient.ResponseReceiver<?> requestSender = reactorNettyClient
                 .post()
-                .uri(ECHO_DELAY_POST_LONG_URL)
+                .uri(ECHO_DELAY_LONG_URL)
                 .send(ByteBufFlux.fromString(Mono.just(Payloads.LONG_JSON)));
         Timer.Context ctx = timer.time();
         try {
@@ -270,7 +270,7 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
         for (int i = 0; i < EXECUTIONS; i++){
             HttpClient.ResponseReceiver<?> requestSender = reactorNettyClient
                     .post()
-                    .uri(ECHO_DELAY_POST_SHORT_URL)
+                    .uri(ECHO_DELAY_SHORT_URL)
                     .send(ByteBufFlux.fromString(Flux.just(Payloads.SHORT_JSON)));
             executeAsync(requestSender, timer, errors, latcher, i).subscribe();
         }
@@ -289,7 +289,7 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
         for (int i = 0; i < EXECUTIONS; i++){
             HttpClient.ResponseReceiver<?> requestSender = reactorNettyClient
                     .post()
-                    .uri(ECHO_DELAY_POST_LONG_URL)
+                    .uri(ECHO_DELAY_LONG_URL)
                     .send(ByteBufFlux.fromString(Flux.just(Payloads.SHORT_JSON)));
             executeAsync(requestSender, timer, errors, latcher, i).subscribe();
         }
@@ -308,7 +308,7 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
         for (int i = 0; i < EXECUTIONS; i++){
             HttpClient.ResponseReceiver<?> requestSender = reactorNettyClient
                     .post()
-                    .uri(ECHO_DELAY_POST_SHORT_URL)
+                    .uri(ECHO_DELAY_SHORT_URL)
                     .send(ByteBufFlux.fromString(Flux.just(Payloads.LONG_JSON)));
             executeAsync(requestSender, timer, errors, latcher, i).subscribe();
         }
@@ -320,6 +320,55 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
     }
 
     @Test(priority = 11)
+    public void testBlockingLongGET() {
+        logger.info("testBlockingLongGET start");
+        Timer timer = getTimingTimer(this.getClass(), "testBlockingLongGET");
+        Counter errors = getErrorCounter(this.getClass(), "testBlockingLongGET");
+        for (int i = 0; i < EXECUTIONS; i++){
+            String uuid = UUID.randomUUID().toString();
+
+            HttpClient.RequestSender requestSender = reactorNettyClient
+                    .request(HttpMethod.GET)
+                    .uri(ECHO_DELAY_LONG_URL);
+
+            Timer.Context ctx = timer.time();
+            try {
+                String result = executeSync(requestSender);
+                ctx.stop();
+            } catch(Exception ex) {
+                ctx.stop();
+                errors.inc();
+                ex.printStackTrace();
+            }
+        }
+        logger.info("testBlockingLongGET end");
+    }
+
+    @Test(priority = 12)
+    public void testNonBlockingLongGET() {
+        logger.info("testNonBlockingLongGET start");
+        CountDownLatch latcher = new CountDownLatch(EXECUTIONS);
+        Timer timer = getTimingTimer(this.getClass(), "testNonBlockingLongGET");
+        Counter errors = getErrorCounter(this.getClass(), "testNonBlockingLongGET");
+        for (int i = 0; i < EXECUTIONS; i++) {
+            String uuid = UUID.randomUUID().toString();
+
+            HttpClient.RequestSender requestSender = reactorNettyClient
+                    .request(HttpMethod.GET)
+                    .uri(ECHO_DELAY_LONG_URL);
+            executeAsync(requestSender, timer, errors, latcher, i)
+                    .subscribe(s -> {});
+        }
+        try {
+            latcher.await();
+        } catch (InterruptedException e) {
+            logger.error("hey, don't interrupt me!");
+            e.printStackTrace();
+        }
+        logger.info("testNonBlockingLongGET end");
+    }
+
+    @Test(priority = 13)
     public void testNonBlockingLongLongPOST() {
         CountDownLatch latcher = new CountDownLatch(EXECUTIONS);
         Timer timer = getTimingTimer(this.getClass(), "testNonBlockingLongLongPOST");
@@ -327,7 +376,7 @@ public class ReactorNettyHCPerformanceTests extends BenchmarkCommon {
         for (int i = 0; i < EXECUTIONS; i++){
             HttpClient.ResponseReceiver<?> requestSender = reactorNettyClient
                     .post()
-                    .uri(ECHO_DELAY_POST_LONG_URL)
+                    .uri(ECHO_DELAY_LONG_URL)
                     .send(ByteBufFlux.fromString(Mono.just(Payloads.LONG_JSON)));
             executeAsync(requestSender, timer, errors, latcher, i).subscribe();
         }
