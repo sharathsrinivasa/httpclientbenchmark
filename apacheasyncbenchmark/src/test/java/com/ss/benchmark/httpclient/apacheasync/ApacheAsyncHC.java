@@ -1,8 +1,5 @@
 package com.ss.benchmark.httpclient.apacheasync;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
 import com.ss.benchmark.httpclient.HC;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
@@ -14,19 +11,11 @@ import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
-import static org.testng.Assert.*;
 
 public class ApacheAsyncHC implements HC {
-    private static final Logger logger = LoggerFactory.getLogger(ApacheAsyncHC.class);
-
     private CloseableHttpAsyncClient client;
 
     private RequestConfig requestConfig = RequestConfig.custom()

@@ -4,8 +4,6 @@ import com.ss.benchmark.httpclient.HC;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.timeout.ReadTimeoutHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.ByteBufFlux;
@@ -17,8 +15,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class ReactorNettyHC implements HC {
-    private static final Logger logger = LoggerFactory.getLogger(ReactorNettyHC.class);
-
     HttpClient client;
 
     @Override
