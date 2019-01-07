@@ -14,6 +14,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpasyncclient</artifactId>
+            <version>4.1.4</version>
+        </dependency>
+        <dependency>
             <groupId>com.ss.benchmark</groupId>
             <artifactId>benchmarkcommon</artifactId>
             <version>${project.version}</version>
