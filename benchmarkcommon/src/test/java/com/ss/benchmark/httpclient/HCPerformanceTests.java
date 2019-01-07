@@ -27,7 +27,7 @@ public abstract class HCPerformanceTests {
     protected static final String ECHO_DELAY_LONG_URL = "/echodelayserv/echo/long";
     protected static final String BASE_URL = "http://localhost:8080";
 
-    protected static final int EXECUTIONS = 10_000;
+    protected static final int EXECUTIONS = 1_000;
 
 
     private static final Logger logger = LoggerFactory.getLogger(HCPerformanceTests.class);

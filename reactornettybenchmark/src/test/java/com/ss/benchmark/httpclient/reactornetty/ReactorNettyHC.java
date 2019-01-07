@@ -24,7 +24,7 @@ public class ReactorNettyHC implements HC {
     @Override
     public void setup(String baseURL) {
         client = HttpClient
-                .create(ConnectionProvider.fixed("benchmark", MAX_CONNECTION_POOL_SIZE, CONNECTION_REQUEST_TIMEOUT))
+                .create(ConnectionProvider.fixed("benchmark", MAX_CONNECTION_POOL_SIZE))
                 .baseUrl(baseURL)
                 .tcpConfiguration(tcpClient ->
                         tcpClient.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNECT_TIMEOUT)
