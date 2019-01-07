@@ -2,7 +2,6 @@ package com.ss.benchmark;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.ss.benchmark.httpclient.common.BenchmarkCommon;
 import com.ss.benchmark.httpclient.common.Payloads;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
