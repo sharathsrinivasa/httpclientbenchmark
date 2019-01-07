@@ -1,25 +1,24 @@
 package com.ss.benchmark.httpclient.reactornetty;
 
-import com.ss.benchmark.httpclient.HC;
+import com.ss.benchmark.httpclient.HttpClient;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.ByteBufFlux;
-import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public class ReactorNettyHC implements HC {
-    HttpClient client;
+public class ReactorNettyHC implements HttpClient {
+    reactor.netty.http.client.HttpClient client;
 
     @Override
     public void createClient(String baseURL) {
-        client = HttpClient
+        client = reactor.netty.http.client.HttpClient
                 .create(ConnectionProvider.fixed("benchmark", MAX_CONNECTION_POOL_SIZE))
                 .baseUrl(baseURL)
                 .tcpConfiguration(tcpClient ->
@@ -29,7 +28,7 @@ public class ReactorNettyHC implements HC {
 
     @Override
     public String blockingGET(String uri) {
-        HttpClient.RequestSender requestSender = client
+        reactor.netty.http.client.HttpClient.RequestSender requestSender = client
                 .request(HttpMethod.GET)
                 .uri(uri);
 
@@ -68,7 +67,7 @@ public class ReactorNettyHC implements HC {
     public CompletableFuture<String> nonblockingGET(String uri) {
         final CompletableFuture<String> cfResponse = new CompletableFuture<>();
 
-        HttpClient.RequestSender requestSender = client
+        reactor.netty.http.client.HttpClient.RequestSender requestSender = client
                 .request(HttpMethod.GET)
                 .uri(uri);
 
@@ -92,7 +91,7 @@ public class ReactorNettyHC implements HC {
     public CompletableFuture<String> nonblockingPOST(String uri, String body) {
         final CompletableFuture<String> cfResponse = new CompletableFuture<>();
 
-        HttpClient.ResponseReceiver<?> requestSender = client
+        reactor.netty.http.client.HttpClient.ResponseReceiver<?> requestSender = client
                 .post()
                 .uri(uri)
                 .send(ByteBufFlux.fromString(Flux.just(body)));

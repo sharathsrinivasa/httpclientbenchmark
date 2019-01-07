@@ -1,6 +1,6 @@
 package com.ss.benchmark.httpclient.apacheasync;
 
-import com.ss.benchmark.httpclient.HC;
+import com.ss.benchmark.httpclient.HttpClient;
 import com.ss.benchmark.httpclient.HCPerformanceTests;
 import org.testng.annotations.Test;
 
@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 public class ApacheAsyncHCPerformanceTests extends HCPerformanceTests {
 
     @Override
-    protected HC getClient() {
+    protected HttpClient getClient() {
         return new ApacheAsyncHC();
     }
 }

@@ -2,7 +2,7 @@ package com.ss.benchmark.httpclient;
 
 import java.util.concurrent.CompletableFuture;
 
-public interface HC {
+public interface HttpClient {
 
     //All times are milliseconds unless otherwise noted
     static final int MAX_CONNECTION_POOL_SIZE = 200;

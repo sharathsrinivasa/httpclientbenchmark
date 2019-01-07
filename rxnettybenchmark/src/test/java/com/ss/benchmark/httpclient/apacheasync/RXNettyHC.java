@@ -1,10 +1,10 @@
 package com.ss.benchmark.httpclient.apacheasync;
 
-import com.ss.benchmark.httpclient.HC;
+import com.ss.benchmark.httpclient.HttpClient;
 
 import java.util.concurrent.CompletableFuture;
 
-public class RXNettyHC implements HC {
+public class RXNettyHC implements HttpClient {
     @Override
     public void createClient(String baseUrl) {
 

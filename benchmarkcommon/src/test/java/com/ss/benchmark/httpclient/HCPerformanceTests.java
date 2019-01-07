@@ -38,7 +38,7 @@ public abstract class HCPerformanceTests {
 
     private Set<CountDownLatch> latches = new HashSet<>();
 
-    private HC client;
+    private HttpClient client;
 
     @BeforeTest
     public void initializeTest() {
@@ -392,7 +392,7 @@ public abstract class HCPerformanceTests {
         }
     }
 
-    protected abstract HC getClient();
+    protected abstract HttpClient getClient();
 }
 
 
