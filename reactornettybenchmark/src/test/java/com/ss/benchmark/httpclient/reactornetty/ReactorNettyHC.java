@@ -22,7 +22,7 @@ public class ReactorNettyHC implements HC {
     HttpClient client;
 
     @Override
-    public void setup(String baseURL) {
+    public void createClient(String baseURL) {
         client = HttpClient
                 .create(ConnectionProvider.fixed("benchmark", MAX_CONNECTION_POOL_SIZE))
                 .baseUrl(baseURL)

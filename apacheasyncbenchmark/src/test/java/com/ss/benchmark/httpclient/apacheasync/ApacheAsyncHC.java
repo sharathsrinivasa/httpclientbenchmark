@@ -37,7 +37,7 @@ public class ApacheAsyncHC implements HC {
     String baseUrl = null;
 
     @Override
-    public void setup(String baseUrl) {
+    public void createClient(String baseUrl) {
         this.baseUrl = baseUrl;
         HttpAsyncClientBuilder httpAsyncClientBuilder = HttpAsyncClients.custom();
         httpAsyncClientBuilder

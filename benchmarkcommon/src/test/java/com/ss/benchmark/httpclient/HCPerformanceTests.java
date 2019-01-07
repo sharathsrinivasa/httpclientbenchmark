@@ -46,7 +46,7 @@ public abstract class HCPerformanceTests {
 
         client = getClient();
 
-        client.setup(BASE_URL);
+        client.createClient(BASE_URL);
 
         // this is simply to warmup the connection pool
         logger.debug("Start warmup");

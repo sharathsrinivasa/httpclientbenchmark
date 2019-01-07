@@ -10,7 +10,7 @@ public class RXNettyHC implements HC {
     private static final Logger logger = LoggerFactory.getLogger(RXNettyHC.class);
 
     @Override
-    public void setup(String baseUrl) {
+    public void createClient(String baseUrl) {
 
     }
 

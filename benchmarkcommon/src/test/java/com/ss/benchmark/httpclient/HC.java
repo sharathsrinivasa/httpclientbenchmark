@@ -7,9 +7,9 @@ public interface HC {
     //All times are milliseconds unless otherwise noted
     static final int MAX_CONNECTION_POOL_SIZE = 200;
     static final int CONNECT_TIMEOUT = 500;
-    static final int READ_TIMEOUT = 2000;
+    static final int READ_TIMEOUT = 2_000;
 
-    void setup(String baseUrl);
+    void createClient(String baseUrl);
 
     String blockingGET(String uri);
 
