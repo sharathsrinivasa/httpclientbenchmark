@@ -4,13 +4,12 @@ import com.codahale.metrics.*;
 import com.ss.benchmark.httpclient.common.Payloads;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -27,20 +26,19 @@ public abstract class HCPerformanceTests {
     protected static final String SERVER_HOST = "localhost";
     protected static final int SERVER_PORT = 8080;
 
-    protected static final int EXECUTIONS = 100;
+    protected static final int EXECUTIONS = 10_000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HCPerformanceTests.class);
 
     protected final MetricRegistry metricRegistry = new MetricRegistry();
     protected final ScheduledReporter reporter = ConsoleReporter.forRegistry(metricRegistry).convertDurationsTo(TimeUnit.MILLISECONDS).build();
 
-
-    private Set<CountDownLatch> latches = new HashSet<>();
+    private Set<CountDownLatch> latches = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     private HttpClient client;
 
     @BeforeTest
-    public void initializeTest() {
+    public void beforeTest() {
         reporter.start(1, TimeUnit.HOURS);
 
         client = getClient();
@@ -57,7 +55,17 @@ public abstract class HCPerformanceTests {
     }
 
     @AfterTest
-    public void finalizeTest() {
+    public void afterTest() {
+        reporter.report();
+        reporter.close();
+    }
+
+    @BeforeMethod
+    public void beforeMethod() {
+    }
+
+    @AfterMethod
+    public void afterMethod() {
         for (CountDownLatch latcher : latches) {
             try {
                 latcher.await();
@@ -65,9 +73,6 @@ public abstract class HCPerformanceTests {
                 e.printStackTrace();
             }
         }
-
-        reporter.report();
-        reporter.close();
     }
 
     @Test(groups = {"sync", "blocking"})
