@@ -60,23 +60,16 @@ public class MockService {
 
     private void createEchoStubs(){
 
-        wireMockServer.stubFor(post(urlPathEqualTo("/echodelayserv/echo/long")).withRequestBody(containing("{"))
+        wireMockServer.stubFor(post(urlPathEqualTo("/long")).withRequestBody(containing("{"))
                 .willReturn(aResponse().withStatus(200).withBody(Payloads.LONG_JSON).withHeader("Content-Type", "application/json")));
 
-        wireMockServer.stubFor(post(urlPathEqualTo("/echodelayserv/echo/short")).withRequestBody(containing("{"))
+        wireMockServer.stubFor(post(urlPathEqualTo("/short")).withRequestBody(containing("{"))
                 .willReturn(aResponse().withStatus(200).withBody(Payloads.SHORT_JSON).withHeader("Content-Type", "application/json")));
 
         wireMockServer.stubFor(
-                get(urlPathEqualTo("/echodelayserv/delay/uniform"))
-                        .willReturn(aResponse().withStatus(200)));
+                      get(urlMatching("/hello"))
+                      .willReturn(aResponse().withStatus(200).withBody(Payloads.HELLO)));
 
-        wireMockServer.stubFor(
-                      get(urlMatching("/echodelayserv/echo/.*"))
-                      .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(Payloads.SHORT_JSON)));
-
-        wireMockServer.stubFor(
-                get(urlMatching("/echodelayserv/echo/long"))
-                        .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(Payloads.LONG_JSON)));
     }
 
     private static String getProperty(String name, String defaultValue){

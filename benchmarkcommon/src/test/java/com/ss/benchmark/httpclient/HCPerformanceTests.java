@@ -10,7 +10,6 @@ import org.testng.annotations.Test;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -22,12 +21,12 @@ import java.util.stream.Collectors;
 @Test(groups = "performance")
 public abstract class HCPerformanceTests {
 
-    protected static final String ECHO_DELAY_BASE_URL = "/echodelayserv/echo";
-    protected static final String ECHO_DELAY_SHORT_URL = "/echodelayserv/echo/short";
-    protected static final String ECHO_DELAY_LONG_URL = "/echodelayserv/echo/long";
+    protected static final String HELLO_URL = "/hello";
+    protected static final String MOCK_SHORT_URL = "/short";
+    protected static final String MOCK_LONG_URL = "/long";
     protected static final String BASE_URL = "http://localhost:8080";
 
-    protected static final int EXECUTIONS = 1_000;
+    protected static final int EXECUTIONS = 100;
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HCPerformanceTests.class);
@@ -102,7 +101,7 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Start " + method);
 
         for (int i = 0; i < EXECUTIONS; i++) {
-            syncPOST(ECHO_DELAY_SHORT_URL,
+            syncPOST(MOCK_SHORT_URL,
                     Payloads.SHORT_JSON,
                     Payloads.SHORT_JSON,
                     metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
@@ -117,7 +116,7 @@ public abstract class HCPerformanceTests {
         String method = myName();
         LOGGER.debug("Start " + method);
 
-        syncPOST(ECHO_DELAY_SHORT_URL,
+        syncPOST(MOCK_SHORT_URL,
                 Payloads.SHORT_JSON,
                 Payloads.SHORT_JSON,
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
@@ -132,7 +131,7 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Start " + method);
 
         for (int i = 0; i < EXECUTIONS; i++) {
-            syncPOST(ECHO_DELAY_LONG_URL,
+            syncPOST(MOCK_LONG_URL,
                     Payloads.SHORT_JSON,
                     Payloads.LONG_JSON,
                     metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
@@ -146,7 +145,7 @@ public abstract class HCPerformanceTests {
         String method = myName();
         LOGGER.debug("Start " + method);
 
-        syncPOST(ECHO_DELAY_LONG_URL,
+        syncPOST(MOCK_LONG_URL,
                 Payloads.SHORT_JSON,
                 Payloads.LONG_JSON,
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
@@ -161,7 +160,7 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Start " + method);
 
         for (int i = 0; i < EXECUTIONS; i++) {
-            syncPOST(ECHO_DELAY_LONG_URL,
+            syncPOST(MOCK_LONG_URL,
                     Payloads.LONG_JSON,
                     Payloads.LONG_JSON,
                     metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
@@ -175,7 +174,7 @@ public abstract class HCPerformanceTests {
         String method = myName();
         LOGGER.debug("Start " + method);
 
-        syncPOST(ECHO_DELAY_LONG_URL,
+        syncPOST(MOCK_LONG_URL,
                 Payloads.LONG_JSON,
                 Payloads.LONG_JSON,
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
@@ -220,7 +219,7 @@ public abstract class HCPerformanceTests {
         CountDownLatch latch = new CountDownLatch(EXECUTIONS);
 
         for (int i = 0; i < EXECUTIONS; i++) {
-            asyncPOST(ECHO_DELAY_SHORT_URL,
+            asyncPOST(MOCK_SHORT_URL,
                     Payloads.SHORT_JSON,
                     Payloads.SHORT_JSON,
                     latch,
@@ -236,7 +235,7 @@ public abstract class HCPerformanceTests {
         String method = myName();
         LOGGER.debug("Start " + method);
 
-        asyncPOST(ECHO_DELAY_SHORT_URL,
+        asyncPOST(MOCK_SHORT_URL,
                 Payloads.SHORT_JSON,
                 Payloads.SHORT_JSON,
                 new CountDownLatch(1),
@@ -254,7 +253,7 @@ public abstract class HCPerformanceTests {
         CountDownLatch latch = new CountDownLatch(EXECUTIONS);
 
         for (int i = 0; i < EXECUTIONS; i++) {
-            asyncPOST(ECHO_DELAY_LONG_URL,
+            asyncPOST(MOCK_LONG_URL,
                     Payloads.SHORT_JSON,
                     Payloads.LONG_JSON,
                     latch,
@@ -270,7 +269,7 @@ public abstract class HCPerformanceTests {
         String method = myName();
         LOGGER.debug("Start " + method);
 
-        asyncPOST(ECHO_DELAY_LONG_URL,
+        asyncPOST(MOCK_LONG_URL,
                 Payloads.SHORT_JSON,
                 Payloads.LONG_JSON,
                 new CountDownLatch(1),
@@ -288,7 +287,7 @@ public abstract class HCPerformanceTests {
         CountDownLatch latch = new CountDownLatch(EXECUTIONS);
 
         for (int i = 0; i < EXECUTIONS; i++) {
-            asyncPOST(ECHO_DELAY_LONG_URL,
+            asyncPOST(MOCK_LONG_URL,
                     Payloads.LONG_JSON,
                     Payloads.LONG_JSON,
                     latch,
@@ -304,7 +303,7 @@ public abstract class HCPerformanceTests {
         String method = myName();
         LOGGER.debug("Start " + method);
 
-        asyncPOST(ECHO_DELAY_LONG_URL,
+        asyncPOST(MOCK_LONG_URL,
                 Payloads.LONG_JSON,
                 Payloads.LONG_JSON,
                 new CountDownLatch(1),
@@ -326,12 +325,11 @@ public abstract class HCPerformanceTests {
         latches.add(latch);
 
         Timer.Context ctx = timer.time();
-        String uuid = UUID.randomUUID().toString();
 
-        CompletableFuture<String> cf = client.nonblockingGET(ECHO_DELAY_BASE_URL + "/" + uuid);
+        CompletableFuture<String> cf = client.nonblockingGET(HELLO_URL);
         cf.handle((result, ex) -> {
             ctx.stop();
-            if (!Payloads.SHORT_JSON.equals(result)) {
+            if (!Payloads.HELLO.equals(result)) {
                 errors.inc();
             }
             latch.countDown();
@@ -359,18 +357,15 @@ public abstract class HCPerformanceTests {
     }
 
     protected void syncGET(Timer timer, Counter errors) {
-        String uuid = UUID.randomUUID().toString();
-
         Timer.Context ctx = timer.time();
         String response = null;
         try {
-            response = client.blockingGET(ECHO_DELAY_BASE_URL + "/" + uuid);
+            response = client.blockingGET(HELLO_URL);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
         } finally {
             ctx.stop();
-            // the mock should return the uuid I pass but it doesn't -- odd but for now just eval to what it does return
-            if (!Payloads.SHORT_JSON.equals(response))
+            if (!Payloads.HELLO.equals(response))
                 errors.inc();
         }
     }

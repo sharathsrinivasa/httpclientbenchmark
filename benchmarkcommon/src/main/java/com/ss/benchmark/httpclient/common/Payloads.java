@@ -30,5 +30,6 @@ public class Payloads {
 
     public static final String SHORT_JSON = load("/short.json");
 
+    public static final String HELLO = "Hello!";
 }
 

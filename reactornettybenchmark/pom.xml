@@ -13,12 +13,8 @@
     <artifactId>reactornettybenchmark</artifactId>
 
     <properties>
-        <reactornetty.version>0.8.3.RELEASE</reactornetty.version>
-        <reactor.version>3.2.2.RELEASE</reactor.version>
-        <!--
+        <!--<reactornetty.version>0.8.3.RELEASE</reactornetty.version>-->
         <reactornetty.version>0.8.4.BUILD-SNAPSHOT</reactornetty.version>
-        <reactor.version>3.2.4.BUILD-SNAPSHOT</reactor.version>
-        -->
     </properties>
 
     <repositories>
