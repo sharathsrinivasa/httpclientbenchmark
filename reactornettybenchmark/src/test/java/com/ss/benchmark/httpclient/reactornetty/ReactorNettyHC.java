@@ -17,7 +17,8 @@ public class ReactorNettyHC implements HttpClient {
     reactor.netty.http.client.HttpClient client;
 
     @Override
-    public void createClient(String baseURL) {
+    public void createClient(String host, int port) {
+        String baseURL = url(host, port);
         client = reactor.netty.http.client.HttpClient
                 .create(ConnectionProvider.fixed("benchmark", MAX_CONNECTION_POOL_SIZE))
                 .baseUrl(baseURL)

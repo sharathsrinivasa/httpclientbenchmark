@@ -26,8 +26,8 @@ public class ApacheAsyncHC implements HttpClient {
     String baseUrl = null;
 
     @Override
-    public void createClient(String baseUrl) {
-        this.baseUrl = baseUrl;
+    public void createClient(String host, int port) {
+        this.baseUrl = url(host, port);
         HttpAsyncClientBuilder httpAsyncClientBuilder = HttpAsyncClients.custom();
         httpAsyncClientBuilder
                 .setMaxConnTotal(MAX_CONNECTION_POOL_SIZE);
