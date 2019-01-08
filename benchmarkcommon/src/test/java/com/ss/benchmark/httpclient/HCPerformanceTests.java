@@ -15,8 +15,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.testng.Assert.*;
-
 /**
  * @author sharath.srinivasa
  */
@@ -26,8 +24,10 @@ public abstract class HCPerformanceTests {
     protected static final String HELLO_URL = "/hello";
     protected static final String MOCK_SHORT_URL = "/short";
     protected static final String MOCK_LONG_URL = "/long";
-    protected static final String SERVER_URL = "localhost";
+    protected static final String SERVER_HOST = "localhost";
     protected static final int SERVER_PORT = 8080;
+
+    protected static final int EXECUTIONS = 100;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HCPerformanceTests.class);
 

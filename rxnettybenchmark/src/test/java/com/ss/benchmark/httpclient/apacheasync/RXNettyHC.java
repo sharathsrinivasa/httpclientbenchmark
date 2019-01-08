@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 public class RXNettyHC implements com.ss.benchmark.httpclient.HttpClient {
 
-    private HttpClient<ByteBuf, ByteBuf> client = null;
+    private HttpClient<ByteBuf, ByteBuf> client;
 
     @Override
     public void createClient(String host, int port) {
