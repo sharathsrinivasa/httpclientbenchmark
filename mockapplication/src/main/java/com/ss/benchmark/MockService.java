@@ -60,11 +60,11 @@ public class MockService {
 
     private void createEchoStubs(){
 
-        wireMockServer.stubFor(post(urlPathEqualTo("/long")).withRequestBody(containing("{"))
-                .willReturn(aResponse().withStatus(200).withBody(Payloads.LONG_JSON).withHeader("Content-Type", "application/json")));
+        wireMockServer.stubFor(post(urlPathEqualTo("/long"))
+                .willReturn(aResponse().withStatus(200).withBody(Payloads.LONG)));
 
-        wireMockServer.stubFor(post(urlPathEqualTo("/short")).withRequestBody(containing("{"))
-                .willReturn(aResponse().withStatus(200).withBody(Payloads.SHORT_JSON).withHeader("Content-Type", "application/json")));
+        wireMockServer.stubFor(post(urlPathEqualTo("/short"))
+                .willReturn(aResponse().withStatus(200).withBody(Payloads.SHORT)));
 
         wireMockServer.stubFor(
                       get(urlMatching("/hello"))
