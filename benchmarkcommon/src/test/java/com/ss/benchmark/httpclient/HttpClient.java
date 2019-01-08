@@ -6,8 +6,8 @@ public interface HttpClient {
 
     //All times are milliseconds unless otherwise noted
     int MAX_CONNECTION_POOL_SIZE = 200;
-    int CONNECT_TIMEOUT = 500;
-    int READ_TIMEOUT = 2_000;
+    int CONNECT_TIMEOUT = 5_000;
+    int READ_TIMEOUT = 50_000;
 
     /**
      * HTTP protocol is assumed.
