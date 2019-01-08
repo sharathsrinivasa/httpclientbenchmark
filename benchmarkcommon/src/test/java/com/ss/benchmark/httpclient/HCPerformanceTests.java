@@ -26,7 +26,8 @@ public abstract class HCPerformanceTests {
     protected static final String SERVER_HOST = "localhost";
     protected static final int SERVER_PORT = 8080;
 
-    protected static final int EXECUTIONS = 10_000;
+    protected static final int EXECUTIONS = 1_000;
+    protected static final int WORKERS = 100;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HCPerformanceTests.class);
 
@@ -75,21 +76,19 @@ public abstract class HCPerformanceTests {
         }
     }
 
-    @Test(groups = {"sync", "blocking"})
-    public void testSyncBlockingShortGET() {
+    @Test(invocationCount = EXECUTIONS, threadPoolSize = 1, groups = {"sync", "blocking"})
+    public void testSingleThreadedBlockingShortGET() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
-        for (int i = 0; i < EXECUTIONS; i++) {
-            syncGET(metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
-                    metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
-        }
+        syncGET(metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
+                metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
 
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(invocationCount = EXECUTIONS, threadPoolSize = 100, groups = {"async", "blocking"})
-    public void testAsyncBlockingShortGET() {
+    @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"multithreaded", "blocking"})
+    public void testMultiThreadedBlockingShortGET() {
         String method = myName();
 
         LOGGER.debug("Start " + method);
@@ -100,24 +99,8 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(groups = {"sync", "blocking"})
-    public void testSyncBlockingShortShortPOST() {
-        String method = myName();
-        LOGGER.debug("Start " + method);
-
-        for (int i = 0; i < EXECUTIONS; i++) {
-            syncPOST(MOCK_SHORT_URL,
-                    Payloads.SHORT_JSON,
-                    Payloads.SHORT_JSON,
-                    metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
-                    metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
-        }
-
-        LOGGER.debug("Completed " + method);
-    }
-
-    @Test(invocationCount = EXECUTIONS, threadPoolSize = 100, groups = {"async", "blocking"})
-    public void testAsyncBlockingShortShortPOST() {
+    @Test(invocationCount = EXECUTIONS, threadPoolSize = 1, groups = {"singlethreaded", "blocking"})
+    public void testSingleThreadedBlockingShortShortPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
@@ -130,23 +113,22 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(groups = {"sync", "blocking"})
-    public void testSyncBlockingShortLongPOST() {
+    @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"multithreaded", "blocking"})
+    public void testMultiThreadedBlockingShortShortPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
-        for (int i = 0; i < EXECUTIONS; i++) {
-            syncPOST(MOCK_LONG_URL,
-                    Payloads.SHORT_JSON,
-                    Payloads.LONG_JSON,
-                    metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
-                    metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
-        }
+        syncPOST(MOCK_SHORT_URL,
+                Payloads.SHORT_JSON,
+                Payloads.SHORT_JSON,
+                metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
+                metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
+
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(invocationCount = EXECUTIONS, threadPoolSize = 100, groups = {"async", "blocking"})
-    public void testAsyncBlockingShortLongPOST() {
+    @Test(invocationCount = EXECUTIONS, threadPoolSize = 1, groups = {"singlethreaded", "blocking"})
+    public void testSingleThreadedBlockingShortLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
@@ -159,23 +141,22 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(groups = {"sync", "blocking"})
-    public void testSyncBlockingLongLongPOST() {
+    @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"multithreaded", "blocking"})
+    public void testMultiThreadedBlockingShortLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
-        for (int i = 0; i < EXECUTIONS; i++) {
-            syncPOST(MOCK_LONG_URL,
-                    Payloads.LONG_JSON,
-                    Payloads.LONG_JSON,
-                    metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
-                    metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
-        }
+        syncPOST(MOCK_LONG_URL,
+                Payloads.SHORT_JSON,
+                Payloads.LONG_JSON,
+                metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
+                metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
+
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(invocationCount = EXECUTIONS, threadPoolSize = 100, groups = {"async", "blocking"})
-    public void testAsyncBlockingLongLongPOST() {
+    @Test(invocationCount = EXECUTIONS, threadPoolSize = 1, groups = {"singlethreaded", "blocking"})
+    public void testSingleThreadedBlockingLongLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
@@ -188,24 +169,35 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(groups = {"sync", "nonblocking"})
-    public void testSyncNonBlockingShortGET() {
+    @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"multithreaded", "blocking"})
+    public void testMultiThreadedBlockingLongLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
-        CountDownLatch latch = new CountDownLatch(EXECUTIONS);
-
-        for (int i = 0; i < EXECUTIONS; i++) {
-            asyncGET(latch,
-                    metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
-                    metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
-        }
+        syncPOST(MOCK_LONG_URL,
+                Payloads.LONG_JSON,
+                Payloads.LONG_JSON,
+                metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
+                metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
 
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(invocationCount = EXECUTIONS, threadPoolSize = 100, groups = {"async", "nonblocking"})
-    public void testAsyncNonBlockingShortGET() {
+    @Test(invocationCount = EXECUTIONS, threadPoolSize = 1, groups = {"singlethreaded", "nonblocking"})
+    public void testSingleThreadedNonBlockingShortGET() {
+        String method = myName();
+        LOGGER.debug("Start " + method);
+
+
+            asyncGET(new CountDownLatch(1),
+                    metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
+                    metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
+
+        LOGGER.debug("Completed " + method);
+    }
+
+    @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"multithreaded", "nonblocking"})
+    public void testMultiThreadedNonBlockingShortGET() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
@@ -216,27 +208,25 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(groups = {"sync", "nonblocking"})
-    public void testSyncNonBlockingShortShortPOST() {
+    @Test(invocationCount = EXECUTIONS, threadPoolSize = 1, groups = {"singlethreaded", "nonblocking"})
+    public void testSingleThreadedNonBlockingShortShortPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
-        CountDownLatch latch = new CountDownLatch(EXECUTIONS);
 
-        for (int i = 0; i < EXECUTIONS; i++) {
-            asyncPOST(MOCK_SHORT_URL,
-                    Payloads.SHORT_JSON,
-                    Payloads.SHORT_JSON,
-                    latch,
-                    metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
-                    metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
-        }
+        asyncPOST(MOCK_SHORT_URL,
+                Payloads.SHORT_JSON,
+                Payloads.SHORT_JSON,
+                new CountDownLatch(1),
+                metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
+                metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
+
 
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(invocationCount = EXECUTIONS, threadPoolSize = 100, groups = {"async", "nonblocking"})
-    public void testAsyncNonBlockingShortShortPOST() {
+    @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"multithreaded", "nonblocking"})
+    public void testMultiThreadedNonBlockingShortShortPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
@@ -250,27 +240,24 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(groups = {"sync", "nonblocking"})
-    public void testSyncNonBlockingShortLongPOST() {
+    @Test(invocationCount = EXECUTIONS, threadPoolSize = 1, groups = {"singlethreaded", "nonblocking"})
+    public void testSingleThreadedNonBlockingShortLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
-        CountDownLatch latch = new CountDownLatch(EXECUTIONS);
+        asyncPOST(MOCK_LONG_URL,
+                Payloads.SHORT_JSON,
+                Payloads.LONG_JSON,
+                new CountDownLatch(1),
+                metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
+                metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
 
-        for (int i = 0; i < EXECUTIONS; i++) {
-            asyncPOST(MOCK_LONG_URL,
-                    Payloads.SHORT_JSON,
-                    Payloads.LONG_JSON,
-                    latch,
-                    metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
-                    metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
-        }
 
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(invocationCount = EXECUTIONS, threadPoolSize = 100, groups = {"async", "nonblocking"})
-    public void testAsyncNonBlockingShortLongPOST() {
+    @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"multithreaded", "nonblocking"})
+    public void testMultiThreadedNonBlockingShortLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
@@ -284,27 +271,23 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(groups = {"sync", "nonblocking"})
-    public void testSyncNonBlockingLongLongPOST() {
+    @Test(invocationCount = EXECUTIONS, threadPoolSize = 1, groups = {"singlethreaded", "nonblocking"})
+    public void testSingleThreadedNonBlockingLongLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
-        CountDownLatch latch = new CountDownLatch(EXECUTIONS);
-
-        for (int i = 0; i < EXECUTIONS; i++) {
-            asyncPOST(MOCK_LONG_URL,
-                    Payloads.LONG_JSON,
-                    Payloads.LONG_JSON,
-                    latch,
-                    metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
-                    metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
-        }
+        asyncPOST(MOCK_LONG_URL,
+                Payloads.LONG_JSON,
+                Payloads.LONG_JSON,
+                new CountDownLatch(1),
+                metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
+                metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
 
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(invocationCount = EXECUTIONS, threadPoolSize = 100, groups = {"async", "nonblocking"})
-    public void testAsyncNonBlockingLongLongPOST() {
+    @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"multithreaded", "nonblocking"})
+    public void testMultiThreadedNonBlockingLongLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
