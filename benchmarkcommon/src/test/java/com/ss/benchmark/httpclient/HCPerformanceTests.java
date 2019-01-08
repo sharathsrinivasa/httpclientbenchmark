@@ -24,10 +24,10 @@ public abstract class HCPerformanceTests {
     protected static final String HELLO_URL = "/hello";
     protected static final String MOCK_SHORT_URL = "/short";
     protected static final String MOCK_LONG_URL = "/long";
-    protected static final String BASE_URL = "http://localhost:8080";
+    protected static final String SERVER_HOST = "localhost";
+    protected static final int SERVER_PORT = 8080;
 
     protected static final int EXECUTIONS = 100;
-
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HCPerformanceTests.class);
 
@@ -45,7 +45,7 @@ public abstract class HCPerformanceTests {
 
         client = getClient();
 
-        client.createClient(BASE_URL);
+        client.createClient(SERVER_HOST, SERVER_PORT);
 
         // this is simply to warmup the connection pool
         LOGGER.debug("Start warmup");

@@ -5,11 +5,14 @@ import java.util.concurrent.CompletableFuture;
 public interface HttpClient {
 
     //All times are milliseconds unless otherwise noted
-    static final int MAX_CONNECTION_POOL_SIZE = 200;
-    static final int CONNECT_TIMEOUT = 500;
-    static final int READ_TIMEOUT = 2_000;
+    int MAX_CONNECTION_POOL_SIZE = 200;
+    int CONNECT_TIMEOUT = 500;
+    int READ_TIMEOUT = 2_000;
 
-    void createClient(String baseUrl);
+    /**
+     * HTTP protocol is assumed.
+     */
+    void createClient(String host, int port);
 
     String blockingGET(String uri);
 
@@ -19,4 +22,7 @@ public interface HttpClient {
 
     CompletableFuture<String> nonblockingPOST(String uri, String body);
 
+    default String url(String host, int port) {
+        return "http://" + host + ":" + port;
+    }
 }
