@@ -77,7 +77,7 @@ public abstract class HCPerformanceTests {
     }
 
     @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"blocking"})
-    public void testMultiThreadedBlockingShortGET() {
+    public void testBlockingShortGET() {
         String method = myName();
 
         LOGGER.debug("Start " + method);
@@ -89,7 +89,7 @@ public abstract class HCPerformanceTests {
     }
 
     @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"blocking"})
-    public void testMultiThreadedBlockingShortShortPOST() {
+    public void testBlockingShortShortPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
@@ -103,7 +103,7 @@ public abstract class HCPerformanceTests {
     }
 
     @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"blocking"})
-    public void testMultiThreadedBlockingShortLongPOST() {
+    public void testBlockingShortLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
@@ -117,7 +117,7 @@ public abstract class HCPerformanceTests {
     }
 
     @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"blocking"})
-    public void testMultiThreadedBlockingLongLongPOST() {
+    public void testBlockingLongLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
@@ -131,7 +131,7 @@ public abstract class HCPerformanceTests {
     }
 
     @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"nonblocking"})
-    public void testMultiThreadedNonBlockingShortGET() {
+    public void testNonBlockingShortGET() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
@@ -143,7 +143,7 @@ public abstract class HCPerformanceTests {
     }
 
     @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"nonblocking"})
-    public void testMultiThreadedNonBlockingShortShortPOST() {
+    public void testNonBlockingShortShortPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
@@ -158,7 +158,7 @@ public abstract class HCPerformanceTests {
     }
 
     @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"nonblocking"})
-    public void testMultiThreadedNonBlockingShortLongPOST() {
+    public void testNonBlockingShortLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
@@ -173,7 +173,7 @@ public abstract class HCPerformanceTests {
     }
 
     @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"nonblocking"})
-    public void testMultiThreadedNonBlockingLongLongPOST() {
+    public void testNonBlockingLongLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
 
