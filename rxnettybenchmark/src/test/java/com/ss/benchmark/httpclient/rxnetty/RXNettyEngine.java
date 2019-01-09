@@ -1,5 +1,6 @@
-package com.ss.benchmark.httpclient.apacheasync;
+package com.ss.benchmark.httpclient.rxnetty;
 
+import com.ss.benchmark.httpclient.HttpClientEngine;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelOption;
 import io.reactivex.netty.client.Host;
@@ -13,7 +14,7 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public class RXNettyHC implements com.ss.benchmark.httpclient.HttpClient {
+public class RXNettyEngine implements HttpClientEngine {
 
     private HttpClient<ByteBuf, ByteBuf> client;
 

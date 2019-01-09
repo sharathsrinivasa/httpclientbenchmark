@@ -1,6 +1,6 @@
 package com.ss.benchmark.httpclient.reactornetty;
 
-import com.ss.benchmark.httpclient.HttpClient;
+import com.ss.benchmark.httpclient.HttpClientEngine;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public class ReactorNettyHC implements HttpClient {
+public class ReactorNettyEngine implements HttpClientEngine {
     reactor.netty.http.client.HttpClient client;
 
     @Override

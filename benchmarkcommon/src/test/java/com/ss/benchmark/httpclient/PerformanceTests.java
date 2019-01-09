@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * @author sharath.srinivasa
  */
 @Test(groups = "performance")
-public abstract class HCPerformanceTests {
+public abstract class PerformanceTests {
 
     protected static final String HELLO_URL = "/hello";
     protected static final String MOCK_SHORT_URL = "/short";
@@ -26,17 +26,17 @@ public abstract class HCPerformanceTests {
     protected static final String SERVER_HOST = "localhost";
     protected static final int SERVER_PORT = 8080;
 
-    protected static final int EXECUTIONS = 1_000;
+    protected static final int EXECUTIONS = 10_000;
     protected static final int WORKERS = 40;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HCPerformanceTests.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PerformanceTests.class);
 
     protected final MetricRegistry metricRegistry = new MetricRegistry();
     protected final ScheduledReporter reporter = ConsoleReporter.forRegistry(metricRegistry).convertDurationsTo(TimeUnit.MILLISECONDS).build();
 
     private Set<CountDownLatch> latches = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
-    private HttpClient client;
+    private HttpClientEngine client;
 
     @BeforeTest
     public void beforeTest() {
@@ -47,8 +47,8 @@ public abstract class HCPerformanceTests {
         client.createClient(SERVER_HOST, SERVER_PORT);
 
         // this is simply to warmup the connection pool
-        LOGGER.debug("Start warmup by issuing connections equal to client pool size: [" + HttpClient.MAX_CONNECTION_POOL_SIZE + "]");
-        for (int i = 0; i < HttpClient.MAX_CONNECTION_POOL_SIZE; i++) {
+        LOGGER.debug("Start warmup by issuing connections equal to client pool size: [" + HttpClientEngine.MAX_CONNECTION_POOL_SIZE + "]");
+        for (int i = 0; i < HttpClientEngine.MAX_CONNECTION_POOL_SIZE; i++) {
             syncGET(metricRegistry.timer(MetricRegistry.name(this.getClass(), "warmup", "timing")),
                     metricRegistry.counter(MetricRegistry.name(this.getClass(), "warmup", "errorRate")));
         }
@@ -261,7 +261,7 @@ public abstract class HCPerformanceTests {
         }
     }
 
-    protected abstract HttpClient getClient();
+    protected abstract HttpClientEngine getClient();
 }
 
 

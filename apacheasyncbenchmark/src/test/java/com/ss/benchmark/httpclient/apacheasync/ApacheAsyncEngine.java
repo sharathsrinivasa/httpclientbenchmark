@@ -1,6 +1,6 @@
 package com.ss.benchmark.httpclient.apacheasync;
 
-import com.ss.benchmark.httpclient.HttpClient;
+import com.ss.benchmark.httpclient.HttpClientEngine;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
@@ -15,7 +15,7 @@ import org.apache.http.util.EntityUtils;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-public class ApacheAsyncHC implements HttpClient {
+public class ApacheAsyncEngine implements HttpClientEngine {
     private CloseableHttpAsyncClient client;
 
     private RequestConfig requestConfig = RequestConfig.custom()
