@@ -6,8 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.*;
 
-import java.util.Collections;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -34,7 +32,7 @@ public abstract class PerformanceTests {
     protected final MetricRegistry metricRegistry = new MetricRegistry();
     protected final ScheduledReporter reporter = ConsoleReporter.forRegistry(metricRegistry).convertDurationsTo(TimeUnit.MILLISECONDS).build();
 
-    private Set<CountDownLatch> latches = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private ConcurrentHashMap<String, CountDownLatch> latches = new ConcurrentHashMap<>();
 
     private HttpClientEngine client;
 
@@ -61,13 +59,15 @@ public abstract class PerformanceTests {
 
     @AfterMethod
     public void afterMethod() {
-        for (CountDownLatch latcher : latches) {
-            try {
-                latcher.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        try {
+            CountDownLatch latch = latches.get(Thread.currentThread().getName());
+            if(latch != null)
+                latch.await();
+        } catch (
+                InterruptedException e) {
+            e.printStackTrace();
         }
+        LOGGER.debug("Completed");
     }
 
     @Test(priority = 0)
@@ -80,11 +80,9 @@ public abstract class PerformanceTests {
             syncGET(metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                     metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
         }
-
-        LOGGER.debug("Completed " + method);
     }
 
-    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"blocking"})
+    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"blocking"})
     public void testBlockingShortGET() {
         String method = myName();
 
@@ -92,11 +90,9 @@ public abstract class PerformanceTests {
 
         syncGET(metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
-
-        LOGGER.debug("Completed " + method);
     }
 
-    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"blocking"})
+    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"blocking"})
     public void testBlockingShortShortPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
@@ -106,11 +102,9 @@ public abstract class PerformanceTests {
                 Payloads.SHORT,
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
-
-        LOGGER.debug("Completed " + method);
     }
 
-    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"blocking"})
+    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"blocking"})
     public void testBlockingShortLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
@@ -120,11 +114,9 @@ public abstract class PerformanceTests {
                 Payloads.LONG,
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
-
-        LOGGER.debug("Completed " + method);
     }
 
-    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"blocking"})
+    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"blocking"})
     public void testBlockingLongLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
@@ -134,11 +126,9 @@ public abstract class PerformanceTests {
                 Payloads.LONG,
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
-
-        LOGGER.debug("Completed " + method);
     }
 
-    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"nonblocking"})
+    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"nonblocking"})
     public void testNonBlockingShortGET() {
         String method = myName();
         LOGGER.debug("Start " + method);
@@ -146,11 +136,9 @@ public abstract class PerformanceTests {
         asyncGET(new CountDownLatch(1),
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
-
-        LOGGER.debug("Completed " + method);
     }
 
-    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"nonblocking"})
+    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"nonblocking"})
     public void testNonBlockingShortShortPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
@@ -161,11 +149,9 @@ public abstract class PerformanceTests {
                 new CountDownLatch(1),
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
-
-        LOGGER.debug("Completed " + method);
     }
 
-    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"nonblocking"})
+    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"nonblocking"})
     public void testNonBlockingShortLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
@@ -176,11 +162,9 @@ public abstract class PerformanceTests {
                 new CountDownLatch(1),
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
-
-        LOGGER.debug("Completed " + method);
     }
 
-    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"nonblocking"})
+    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"nonblocking"})
     public void testNonBlockingLongLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
@@ -191,8 +175,6 @@ public abstract class PerformanceTests {
                 new CountDownLatch(1),
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
-
-        LOGGER.debug("Completed " + method);
     }
 
 
@@ -204,7 +186,7 @@ public abstract class PerformanceTests {
     }
 
     protected void asyncGET(CountDownLatch latch, Timer timer, Counter errors) {
-        latches.add(latch);
+        latches.put(Thread.currentThread().getName(), latch);
 
         Timer.Context ctx = timer.time();
 
@@ -219,11 +201,12 @@ public abstract class PerformanceTests {
         });
     }
 
-    protected void asyncPOST(String url, String payload, String expect, CountDownLatch latch, Timer timer, Counter errors) {
+    protected void asyncPOST(String url, String payload, String expect, CountDownLatch latch, Timer timer, Counter
+            errors) {
         if (expect == null)
             throw new IllegalArgumentException("expected response payload can not be null");
 
-        latches.add(latch);
+        latches.put(Thread.currentThread().getName(), latch);
 
         Timer.Context ctx = timer.time();
 
