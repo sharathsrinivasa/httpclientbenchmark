@@ -50,6 +50,7 @@ public abstract class PerformanceTests {
 
     @AfterTest
     public void afterTest() {
+        reporter.stop();
         reporter.report();
         reporter.close();
     }
