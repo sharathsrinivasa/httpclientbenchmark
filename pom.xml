@@ -21,6 +21,7 @@
         <module>reactornettybenchmark</module>
         <module>rxnettybenchmark</module>
         <module>apacheasyncbenchmark</module>
+        <module>gatling-stress</module>
     </modules>
 
     <dependencyManagement>
