@@ -40,19 +40,12 @@ public abstract class PerformanceTests {
 
     @BeforeTest
     public void beforeTest() {
-        reporter.start(1, TimeUnit.HOURS);
+        // output metrics on a schedule
+        reporter.start(20, TimeUnit.SECONDS);
 
         client = getClient();
 
         client.createClient(SERVER_HOST, SERVER_PORT);
-
-        // this is simply to warmup the connection pool
-        LOGGER.debug("Start warmup by issuing connections equal to client pool size: [" + HttpClientEngine.MAX_CONNECTION_POOL_SIZE + "]");
-        for (int i = 0; i < HttpClientEngine.MAX_CONNECTION_POOL_SIZE; i++) {
-            syncGET(metricRegistry.timer(MetricRegistry.name(this.getClass(), "warmup", "timing")),
-                    metricRegistry.counter(MetricRegistry.name(this.getClass(), "warmup", "errorRate")));
-        }
-        LOGGER.debug("Completed warmup");
     }
 
     @AfterTest
@@ -76,7 +69,21 @@ public abstract class PerformanceTests {
         }
     }
 
-    @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"blocking"})
+    @Test(priority = 0)
+    public void testWarmupCache() {
+        String method = myName();
+
+        LOGGER.debug("Start " + method);
+
+        for (int i = 0; i < HttpClientEngine.MAX_CONNECTION_POOL_SIZE; i++) {
+            syncGET(metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
+                    metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
+        }
+
+        LOGGER.debug("Completed " + method);
+    }
+
+    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"blocking"})
     public void testBlockingShortGET() {
         String method = myName();
 
@@ -88,7 +95,7 @@ public abstract class PerformanceTests {
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"blocking"})
+    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"blocking"})
     public void testBlockingShortShortPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
@@ -102,7 +109,7 @@ public abstract class PerformanceTests {
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"blocking"})
+    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"blocking"})
     public void testBlockingShortLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
@@ -116,7 +123,7 @@ public abstract class PerformanceTests {
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"blocking"})
+    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"blocking"})
     public void testBlockingLongLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
@@ -130,7 +137,7 @@ public abstract class PerformanceTests {
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"nonblocking"})
+    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"nonblocking"})
     public void testNonBlockingShortGET() {
         String method = myName();
         LOGGER.debug("Start " + method);
@@ -142,7 +149,7 @@ public abstract class PerformanceTests {
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"nonblocking"})
+    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"nonblocking"})
     public void testNonBlockingShortShortPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
@@ -157,7 +164,7 @@ public abstract class PerformanceTests {
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"nonblocking"})
+    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"nonblocking"})
     public void testNonBlockingShortLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
@@ -172,7 +179,7 @@ public abstract class PerformanceTests {
         LOGGER.debug("Completed " + method);
     }
 
-    @Test(invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"nonblocking"})
+    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups ={"nonblocking"})
     public void testNonBlockingLongLongPOST() {
         String method = myName();
         LOGGER.debug("Start " + method);
