@@ -40,7 +40,7 @@ public abstract class HCPerformanceTests {
 
     @BeforeTest
     public void beforeTest() {
-        reporter.start(1, TimeUnit.HOURS);
+        reporter.start(30, TimeUnit.SECONDS);
 
         client = getClient();
 
@@ -105,8 +105,8 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Start " + method);
 
         syncPOST(MOCK_SHORT_URL,
-                Payloads.SHORT_JSON,
-                Payloads.SHORT_JSON,
+                Payloads.SHORT,
+                Payloads.SHORT,
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
 
@@ -119,8 +119,8 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Start " + method);
 
         syncPOST(MOCK_SHORT_URL,
-                Payloads.SHORT_JSON,
-                Payloads.SHORT_JSON,
+                Payloads.SHORT,
+                Payloads.SHORT,
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
 
@@ -133,8 +133,8 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Start " + method);
 
         syncPOST(MOCK_LONG_URL,
-                Payloads.SHORT_JSON,
-                Payloads.LONG_JSON,
+                Payloads.SHORT,
+                Payloads.LONG,
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
 
@@ -147,8 +147,8 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Start " + method);
 
         syncPOST(MOCK_LONG_URL,
-                Payloads.SHORT_JSON,
-                Payloads.LONG_JSON,
+                Payloads.SHORT,
+                Payloads.LONG,
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
 
@@ -161,8 +161,8 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Start " + method);
 
         syncPOST(MOCK_LONG_URL,
-                Payloads.LONG_JSON,
-                Payloads.LONG_JSON,
+                Payloads.LONG,
+                Payloads.LONG,
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
 
@@ -175,8 +175,8 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Start " + method);
 
         syncPOST(MOCK_LONG_URL,
-                Payloads.LONG_JSON,
-                Payloads.LONG_JSON,
+                Payloads.LONG,
+                Payloads.LONG,
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
 
@@ -213,10 +213,9 @@ public abstract class HCPerformanceTests {
         String method = myName();
         LOGGER.debug("Start " + method);
 
-
         asyncPOST(MOCK_SHORT_URL,
-                Payloads.SHORT_JSON,
-                Payloads.SHORT_JSON,
+                Payloads.SHORT,
+                Payloads.SHORT,
                 new CountDownLatch(1),
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
@@ -231,8 +230,8 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Start " + method);
 
         asyncPOST(MOCK_SHORT_URL,
-                Payloads.SHORT_JSON,
-                Payloads.SHORT_JSON,
+                Payloads.SHORT,
+                Payloads.SHORT,
                 new CountDownLatch(1),
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
@@ -246,8 +245,8 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Start " + method);
 
         asyncPOST(MOCK_LONG_URL,
-                Payloads.SHORT_JSON,
-                Payloads.LONG_JSON,
+                Payloads.SHORT,
+                Payloads.LONG,
                 new CountDownLatch(1),
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
@@ -262,8 +261,8 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Start " + method);
 
         asyncPOST(MOCK_LONG_URL,
-                Payloads.SHORT_JSON,
-                Payloads.LONG_JSON,
+                Payloads.SHORT,
+                Payloads.LONG,
                 new CountDownLatch(1),
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
@@ -277,8 +276,8 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Start " + method);
 
         asyncPOST(MOCK_LONG_URL,
-                Payloads.LONG_JSON,
-                Payloads.LONG_JSON,
+                Payloads.LONG,
+                Payloads.LONG,
                 new CountDownLatch(1),
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
@@ -292,15 +291,14 @@ public abstract class HCPerformanceTests {
         LOGGER.debug("Start " + method);
 
         asyncPOST(MOCK_LONG_URL,
-                Payloads.LONG_JSON,
-                Payloads.LONG_JSON,
+                Payloads.LONG,
+                Payloads.LONG,
                 new CountDownLatch(1),
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
 
         LOGGER.debug("Completed " + method);
     }
-
 
     protected static String myName() {
         return StackWalker
@@ -336,7 +334,7 @@ public abstract class HCPerformanceTests {
         CompletableFuture<String> cf = client.nonblockingPOST(url, payload);
         cf.handle((result, ex) -> {
             ctx.stop();
-            if (!expect.equals(result)) {
+            if (ex != null || !expect.equals(result)) {
                 errors.inc();
             }
             latch.countDown();
