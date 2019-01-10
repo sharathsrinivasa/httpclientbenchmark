@@ -1,11 +1,12 @@
 package benchmark;
 
+import com.ss.benchmark.httpclient.common.HttpClientEngine;
 import org.asynchttpclient.*;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 
-public class AsyncHttpClientBenchmarkClient implements com.ss.benchmark.httpclient.HttpClient {
+public class AsyncHttpClientEngine implements HttpClientEngine {
 
     private AsyncHttpClient client;
     private String baseUrl;
@@ -50,9 +51,12 @@ public class AsyncHttpClientBenchmarkClient implements com.ss.benchmark.httpclie
     private CompletableFuture<String> execute(Request request) {
         return client.executeRequest(request)
                 .toCompletableFuture()
-                .thenApply(resp ->
-                        suppressChecked(() -> new String(resp.getResponseBodyAsBytes(), "UTF-8"))
-                );
+                .thenApply(resp -> {
+                    if (resp.getStatusCode() != 200) {
+                        // TODO
+                    }
+                    return suppressChecked(() -> new String(resp.getResponseBodyAsBytes(), "UTF-8"));
+                });
     }
 
     private String mkUrl(String path) {

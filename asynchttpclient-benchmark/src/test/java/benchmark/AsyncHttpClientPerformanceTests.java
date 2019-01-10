@@ -1,18 +1,18 @@
 package benchmark;
 
-import com.ss.benchmark.httpclient.HCPerformanceTests;
-import com.ss.benchmark.httpclient.HttpClient;
+import com.ss.benchmark.httpclient.common.HttpClientEngine;
+import com.ss.benchmark.httpclient.common.PerformanceTests;
 import org.testng.annotations.Test;
 
 /**
  * @author sharath.srinivasa
  */
 @Test(groups = "performance")
-public class AsyncHttpClientPerformanceTests extends HCPerformanceTests {
+public class AsyncHttpClientPerformanceTests extends PerformanceTests {
 
     @Override
-    protected HttpClient getClient() {
-        return new AsyncHttpClientBenchmarkClient();
+    protected HttpClientEngine getClient() {
+        return new AsyncHttpClientEngine();
     }
 }
 

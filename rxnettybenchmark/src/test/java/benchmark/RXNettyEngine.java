@@ -1,6 +1,6 @@
-package com.ss.benchmark.httpclient.rxnetty;
+package benchmark;
 
-import com.ss.benchmark.httpclient.HttpClientEngine;
+import com.ss.benchmark.httpclient.common.HttpClientEngine;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelOption;
 import io.reactivex.netty.client.Host;

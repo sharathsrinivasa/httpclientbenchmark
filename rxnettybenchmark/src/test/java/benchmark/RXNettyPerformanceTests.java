@@ -1,7 +1,7 @@
-package com.ss.benchmark.httpclient.rxnetty;
+package benchmark;
 
-import com.ss.benchmark.httpclient.HttpClientEngine;
-import com.ss.benchmark.httpclient.PerformanceTests;
+import com.ss.benchmark.httpclient.common.HttpClientEngine;
+import com.ss.benchmark.httpclient.common.PerformanceTests;
 import org.testng.annotations.Test;
 
 /**

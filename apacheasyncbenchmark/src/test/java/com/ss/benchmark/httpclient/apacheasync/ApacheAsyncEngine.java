@@ -1,6 +1,6 @@
 package com.ss.benchmark.httpclient.apacheasync;
 
-import com.ss.benchmark.httpclient.HttpClientEngine;
+import com.ss.benchmark.httpclient.common.HttpClientEngine;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;

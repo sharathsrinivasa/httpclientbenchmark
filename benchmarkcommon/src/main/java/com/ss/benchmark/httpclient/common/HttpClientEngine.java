@@ -1,4 +1,4 @@
-package com.ss.benchmark.httpclient;
+package com.ss.benchmark.httpclient.common;
 
 import java.util.concurrent.CompletableFuture;
 

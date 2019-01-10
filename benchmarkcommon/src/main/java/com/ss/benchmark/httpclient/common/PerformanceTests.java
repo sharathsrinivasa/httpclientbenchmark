@@ -1,7 +1,6 @@
-package com.ss.benchmark.httpclient;
+package com.ss.benchmark.httpclient.common;
 
 import com.codahale.metrics.*;
-import com.ss.benchmark.httpclient.common.Payloads;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.*;
