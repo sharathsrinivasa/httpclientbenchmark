@@ -7,6 +7,7 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.ByteBufFlux;
+import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 
 import java.nio.charset.StandardCharsets;
@@ -14,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class ReactorNettyEngine implements HttpClientEngine {
-    reactor.netty.http.client.HttpClient client;
+    HttpClient client;
 
     @Override
     public void createClient(String host, int port) {
