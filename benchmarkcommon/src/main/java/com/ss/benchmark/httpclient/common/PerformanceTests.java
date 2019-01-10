@@ -1,15 +1,17 @@
-package com.ss.benchmark.httpclient.common;
+package com.ss.benchmark.httpclient;
 
 import com.codahale.metrics.*;
+import com.ss.benchmark.httpclient.common.HttpClientEngine;
+import com.ss.benchmark.httpclient.common.Payloads;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.*;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * @author sharath.srinivasa
@@ -47,7 +49,6 @@ public abstract class PerformanceTests {
 
     @AfterTest
     public void afterTest() {
-        reporter.stop();
         reporter.report();
         reporter.close();
     }
@@ -70,8 +71,8 @@ public abstract class PerformanceTests {
     }
 
     @Test(priority = 0)
-    public void testWarmupCache() {
-        String method = myName();
+    public void testWarmupCache(Method m) {
+        String method = m.getName();
 
         LOGGER.debug("Start " + method);
 
@@ -82,8 +83,8 @@ public abstract class PerformanceTests {
     }
 
     @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"blocking"})
-    public void testBlockingShortGET() {
-        String method = myName();
+    public void testBlockingShortGET(Method m) {
+        String method = m.getName();
 
         LOGGER.debug("Start " + method);
 
@@ -92,8 +93,8 @@ public abstract class PerformanceTests {
     }
 
     @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"blocking"})
-    public void testBlockingShortShortPOST() {
-        String method = myName();
+    public void testBlockingShortShortPOST(Method m) {
+        String method = m.getName();
         LOGGER.debug("Start " + method);
 
         syncPOST(MOCK_SHORT_URL,
@@ -104,8 +105,8 @@ public abstract class PerformanceTests {
     }
 
     @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"blocking"})
-    public void testBlockingShortLongPOST() {
-        String method = myName();
+    public void testBlockingShortLongPOST(Method m) {
+        String method = m.getName();
         LOGGER.debug("Start " + method);
 
         syncPOST(MOCK_LONG_URL,
@@ -116,8 +117,8 @@ public abstract class PerformanceTests {
     }
 
     @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"blocking"})
-    public void testBlockingLongLongPOST() {
-        String method = myName();
+    public void testBlockingLongLongPOST(Method m) {
+        String method = m.getName();
         LOGGER.debug("Start " + method);
 
         syncPOST(MOCK_LONG_URL,
@@ -128,8 +129,8 @@ public abstract class PerformanceTests {
     }
 
     @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"nonblocking"})
-    public void testNonBlockingShortGET() {
-        String method = myName();
+    public void testNonBlockingShortGET(Method m) {
+        String method = m.getName();
         LOGGER.debug("Start " + method);
 
         asyncGET(new CountDownLatch(1),
@@ -138,8 +139,8 @@ public abstract class PerformanceTests {
     }
 
     @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"nonblocking"})
-    public void testNonBlockingShortShortPOST() {
-        String method = myName();
+    public void testNonBlockingShortShortPOST(Method m) {
+        String method = m.getName();
         LOGGER.debug("Start " + method);
 
         asyncPOST(MOCK_SHORT_URL,
@@ -151,8 +152,8 @@ public abstract class PerformanceTests {
     }
 
     @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"nonblocking"})
-    public void testNonBlockingShortLongPOST() {
-        String method = myName();
+    public void testNonBlockingShortLongPOST(Method m) {
+        String method = m.getName();
         LOGGER.debug("Start " + method);
 
         asyncPOST(MOCK_LONG_URL,
@@ -164,8 +165,8 @@ public abstract class PerformanceTests {
     }
 
     @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"nonblocking"})
-    public void testNonBlockingLongLongPOST() {
-        String method = myName();
+    public void testNonBlockingLongLongPOST(Method m) {
+        String method = m.getName();
         LOGGER.debug("Start " + method);
 
         asyncPOST(MOCK_LONG_URL,
@@ -176,16 +177,24 @@ public abstract class PerformanceTests {
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
     }
 
+    @Test(priority = 2, groups = {"nonblocking"})
+    public void testSingleThreadedLoadingUpConnectionPool(Method m) {
+        String method = m.getName();
+        LOGGER.debug("Start " + method);
 
-    protected static String myName() {
-        return StackWalker
-                .getInstance(java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE)
-                .walk(s -> s.skip(1).limit(1).collect(Collectors.toList()))
-                .get(0).getMethodName();
+        CountDownLatch latch = new CountDownLatch(HttpClientEngine.MAX_CONNECTION_POOL_SIZE);
+        latches.put(Thread.currentThread().getName(), latch);
+
+        for(int i = 0; i < HttpClientEngine.MAX_CONNECTION_POOL_SIZE; i++) {
+            asyncGET(latch,
+                    metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
+                    metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
+
+        }
     }
 
     protected void asyncGET(CountDownLatch latch, Timer timer, Counter errors) {
-        latches.put(Thread.currentThread().getName(), latch);
+        latches.putIfAbsent(Thread.currentThread().getName(), latch);
 
         Timer.Context ctx = timer.time();
 
@@ -205,7 +214,7 @@ public abstract class PerformanceTests {
         if (expect == null)
             throw new IllegalArgumentException("expected response payload can not be null");
 
-        latches.put(Thread.currentThread().getName(), latch);
+        latches.putIfAbsent(Thread.currentThread().getName(), latch);
 
         Timer.Context ctx = timer.time();
 
