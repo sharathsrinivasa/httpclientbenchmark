@@ -9,10 +9,14 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-
-    <artifactId>rxnettybenchmark</artifactId>
+    <artifactId>asynchttpclient-benchmark</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.ss.benchmark</groupId>
             <artifactId>benchmarkcommon</artifactId>
@@ -20,14 +24,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
+            <groupId>org.asynchttpclient</groupId>
+            <artifactId>async-http-client</artifactId>
+            <version>2.6.0</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.reactivex</groupId>
-            <artifactId>rxnetty-http</artifactId>
-            <version>0.5.2</version>
         </dependency>
     </dependencies>
 </project>

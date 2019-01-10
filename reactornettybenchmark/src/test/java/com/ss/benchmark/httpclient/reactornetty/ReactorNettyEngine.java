@@ -1,6 +1,6 @@
 package com.ss.benchmark.httpclient.reactornetty;
 
-import com.ss.benchmark.httpclient.HttpClientEngine;
+import com.ss.benchmark.httpclient.common.HttpClientEngine;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.timeout.ReadTimeoutHandler;
