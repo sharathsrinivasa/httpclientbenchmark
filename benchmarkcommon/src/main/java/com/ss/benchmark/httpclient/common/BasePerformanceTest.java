@@ -1,8 +1,6 @@
-package com.ss.benchmark.httpclient;
+package com.ss.benchmark.httpclient.common;
 
 import com.codahale.metrics.*;
-import com.ss.benchmark.httpclient.common.HttpClientEngine;
-import com.ss.benchmark.httpclient.common.Payloads;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.*;
@@ -17,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  * @author sharath.srinivasa
  */
 @Test(groups = "performance")
-public abstract class PerformanceTests {
+public abstract class BasePerformanceTest {
 
     protected static final String HELLO_URL = "/hello";
     protected static final String MOCK_SHORT_URL = "/short";
@@ -28,7 +26,7 @@ public abstract class PerformanceTests {
     protected static final int EXECUTIONS = 10_000;
     protected static final int WORKERS = 40;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PerformanceTests.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BasePerformanceTest.class);
 
     protected final MetricRegistry metricRegistry = new MetricRegistry();
     protected final ScheduledReporter reporter = ConsoleReporter.forRegistry(metricRegistry).convertDurationsTo(TimeUnit.MILLISECONDS).build();
