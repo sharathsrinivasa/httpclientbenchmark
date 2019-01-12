@@ -32,3 +32,17 @@ docker run --rm -it --entrypoint java crankydillo/http-client-benchmark \
 -jar docker-clients/lib/rxnetty-benchmark-1.0.0-SNAPSHOT-jar-with-dependencies.jar \
 testng/rxnetty.xml
 ```
+
+# Building
+
+Build the entire project.  From the root directory, run:
+
+```sh
+mvn clean install
+```
+
+Then build the docker container.  In this module's directory, run:
+
+```sh
+mvn package docker:build
+```
