@@ -16,13 +16,14 @@
     </properties>
 
     <modules>
-        <module>benchmarkcommon</module>
-        <module>mockapplication</module>
-        <module>reactornettybenchmark</module>
-        <module>rxnettybenchmark</module>
-        <module>apacheasyncbenchmark</module>
-        <module>gatling-stress</module>
+        <module>benchmark-common</module>
+        <module>mock-application</module>
+        <module>reactornetty-benchmark</module>
+        <module>rxnetty-benchmark</module>
+        <module>apacheasync-benchmark</module>
         <module>asynchttpclient-benchmark</module>
+        <module>gatling-stress</module>
+        <module>docker-app</module>
     </modules>
 
     <dependencyManagement>
@@ -47,7 +48,7 @@
                 <artifactId>logback-core</artifactId>
                 <version>1.2.3</version>
             </dependency>
-        </dependencies>    </dependencyManagement>
+        </dependencies></dependencyManagement>
 
     <build>
         <plugins>
@@ -89,10 +90,18 @@
                                 <goal>verify</goal>
                             </goals>
                             <configuration>
+                                <testSourceDirectory>${basedir}/src/main/java/</testSourceDirectory>
+                                <testClassesDirectory>${project.build.directory}/classes/</testClassesDirectory>
                                 <includes>
                                     <include>**/*.java</include>
                                 </includes>
                                 <groups>performance</groups>
+                                <properties>
+                                    <property>
+                                        <name>listener</name>
+                                        <value>com.ss.benchmark.httpclient.common.Transformer</value>
+                                    </property>
+                                </properties>
                             </configuration>
                         </execution>
                     </executions>
