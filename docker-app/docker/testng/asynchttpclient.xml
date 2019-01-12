@@ -5,7 +5,7 @@
     </listeners>
     <test name="TestAll">
         <packages>  
-            <package name="benchmark.rxnetty"/>
+            <package name="benchmark.asynchttpclient"/>
         </packages>  
     </test>  
 </suite>
