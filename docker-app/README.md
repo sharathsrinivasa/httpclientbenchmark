@@ -3,6 +3,10 @@
 This builds a docker image that contains both the client tests and the mock
 server.
 
+## WARNING!!!
+
+Some of this code ASSumes the other modules are using certain conventions.
+
 # Usage
 
 The application has help.
