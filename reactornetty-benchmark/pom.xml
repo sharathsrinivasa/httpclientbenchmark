@@ -9,22 +9,41 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>asynchttpclient-benchmark</artifactId>
+
+    <artifactId>reactornetty-benchmark</artifactId>
+
+    <properties>
+        <!--<reactornetty.version>0.8.3.RELEASE</reactornetty.version>-->
+        <reactornetty.version>0.8.4.BUILD-SNAPSHOT</reactornetty.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>public</id>
+            <url>https://repo.spring.io/snapshot</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <dependencies>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.ss.benchmark</groupId>
             <artifactId>benchmark-common</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.asynchttpclient</groupId>
-            <artifactId>async-http-client</artifactId>
-            <version>2.6.0</version>
+            <groupId>io.projectreactor.netty</groupId>
+            <artifactId>reactor-netty</artifactId>
+            <version>${reactornetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
         </dependency>
     </dependencies>
     <build>
