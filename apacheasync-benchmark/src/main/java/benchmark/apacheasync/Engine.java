@@ -12,6 +12,7 @@ import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.util.EntityUtils;
 
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
@@ -128,6 +129,10 @@ public class Engine implements HttpClientEngine {
             }
         });
         return cfResponse;
+    }
 
+    @Override
+    public void close() throws IOException {
+        client.close();
     }
 }

@@ -3,6 +3,7 @@ package benchmark.asynchttpclient;
 import com.ss.benchmark.httpclient.common.HttpClientEngine;
 import org.asynchttpclient.*;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -76,5 +77,10 @@ public class Engine implements HttpClientEngine {
             }
             throw new RuntimeException("Repackaged checked exception as unchecked.  See cause.", e);
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        client.close();
     }
 }

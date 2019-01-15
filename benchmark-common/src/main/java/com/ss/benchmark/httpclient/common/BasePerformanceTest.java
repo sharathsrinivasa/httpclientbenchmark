@@ -5,7 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -33,6 +36,7 @@ public abstract class BasePerformanceTest {
 
     protected final MetricRegistry metricRegistry = new MetricRegistry();
     protected final ScheduledReporter reporter = ConsoleReporter.forRegistry(metricRegistry).convertDurationsTo(TimeUnit.MILLISECONDS).build();
+    private ScheduledReporter csvReporter;
 
     private ConcurrentHashMap<String, CountDownLatch> latches = new ConcurrentHashMap<>();
 
@@ -44,15 +48,35 @@ public abstract class BasePerformanceTest {
         if (DROPWIZARD_REPORTER_SECONDS > 0) {
             reporter.start(DROPWIZARD_REPORTER_SECONDS, TimeUnit.SECONDS);
         }
+
+        File csvParentDir = new File(
+                java.util.Optional.ofNullable(System.getenv("BM.METRICS.DIR"))
+                        .orElse("metrics-csv")
+        );
+        if (csvParentDir.isFile()) {
+            throw new RuntimeException("Expected " + csvParentDir.getAbsolutePath() + " to be a directory.");
+        }
+        File csvDir = new File(csvParentDir, Instant.now().toString());
+        if (!csvDir.mkdirs()) {
+            throw new RuntimeException("Could not create the directory:  " + csvDir.getAbsolutePath());
+        }
+        csvReporter = CsvReporter.forRegistry(metricRegistry).convertDurationsTo(TimeUnit.MILLISECONDS).build(csvDir);
+        csvReporter.start(365, TimeUnit.DAYS);  // the goal is to just get the end numbers.
+
         client = getClient();
 
         client.createClient(SERVER_HOST, SERVER_PORT);
     }
 
     @AfterTest
-    public void afterTest() {
+    public void afterTest() throws IOException {
         reporter.report();
+        reporter.stop();
         reporter.close();
+        csvReporter.report();
+        csvReporter.stop();
+        csvReporter.close();
+        client.close();
     }
 
     @BeforeMethod
@@ -62,7 +86,7 @@ public abstract class BasePerformanceTest {
     @AfterMethod
     public void afterMethod() {
         try {
-            CountDownLatch latch = latches.get(Thread.currentThread().getName());
+            CountDownLatch latch = latches.remove(Thread.currentThread().getName());
             if (latch != null)
                 latch.await();
         } catch (
@@ -179,7 +203,7 @@ public abstract class BasePerformanceTest {
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
     }
 
-    @Test(priority = 2, groups = {"nonblocking"})
+    @Test(priority = 9, groups = {"nonblocking"})
     public void testSingleThreadedLoadingUpConnectionPool(Method m) {
         String method = m.getName();
         LOGGER.debug("Start " + method);
