@@ -2,7 +2,7 @@ import java.io.File
 
 import scala.sys.process._
 
-val usage = "Usage: (test --no-reporter (all | <client>) [<host> <port> <executions> <workers>]) | server | list | help"
+val usage = "Usage: (test --no-reporter (all | <client>) [<host> <port> <executions> <workers>]) | server | list | report <dir> | help"
 
 val suiteFileDir = "testng"
 
@@ -19,7 +19,15 @@ args.filter { _ != disableReporterFlag }.toList match {
   case List("test", client)            => runTest(client, "localhost", 8080)
   case List("list")                    => listClients()
   case List("server")                  => runServer()
+  case List("report", dir)             => generateReport(dir)
   case _                               => exitWithUsage()
+}
+
+def jarPath(name: String) = s"docker-app/lib/$name-1.0.0-SNAPSHOT-jar-with-dependencies.jar"
+
+// Leaving dir as string for now...
+def generateReport(dir: String): Unit = {
+  s"""java -jar ${jarPath("reporter")} $dir""".!
 }
 
 def runAllTests(
@@ -49,8 +57,8 @@ def runTest(
   ).collect { case (n, Some(v)) => (n, v) }
     .map { case (n, v) => s"-Dbm.$n=$v" } 
 
-  val jarName = s"${client}-benchmark-1.0.0-SNAPSHOT-jar-with-dependencies.jar"
-  val cmd = s"java ${sysProps.mkString(" ")} -jar docker-clients/lib/$jarName $testFile"
+  val jarName = jarPath(s"${client}-benchmark")
+  val cmd = s"""java ${sysProps.mkString(" ")} -jar ${jarPath(s"$client-benchmark")} -usedefaultlisteners false $testFile"""
   println(s"Executing:  $cmd")
   cmd.!
 }
@@ -71,5 +79,5 @@ def clients(): Seq[String] = {
 def listClients(): Unit = clients().foreach { println }
 
 def runServer(): Unit = {
-  s"java -jar docker-clients/lib/mock-application-1.0.0-SNAPSHOT-jar-with-dependencies.jar".run()
+  s"""java -jar ${jarPath("mock-application")}""".run()
 }

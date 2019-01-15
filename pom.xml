@@ -24,6 +24,7 @@
         <module>asynchttpclient-benchmark</module>
         <module>gatling-stress</module>
         <module>docker-app</module>
+        <module>reporter</module>
     </modules>
 
     <dependencyManagement>

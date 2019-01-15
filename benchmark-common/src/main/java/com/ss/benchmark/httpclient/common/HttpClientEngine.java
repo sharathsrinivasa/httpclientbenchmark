@@ -1,8 +1,10 @@
 package com.ss.benchmark.httpclient.common;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-public interface HttpClientEngine {
+public interface HttpClientEngine extends Closeable {
 
     //All times are milliseconds unless otherwise noted
     int MAX_CONNECTION_POOL_SIZE = 200;
@@ -25,4 +27,7 @@ public interface HttpClientEngine {
     default String url(String host, int port) {
         return "http://" + host + ":" + port;
     }
+
+    @Override
+    default void close() throws IOException {}
 }
