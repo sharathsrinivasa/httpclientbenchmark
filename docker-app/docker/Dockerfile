@@ -1,4 +1,4 @@
-FROM openjdk:11-jre-slim
+FROM openjdk:11-jdk
 
 RUN apt-get update && apt-get install -y wget zip && apt-get remove -y scala-library scala
 
@@ -10,9 +10,12 @@ RUN apt-get install scala
 
 RUN mkdir -p /app/testng
 
+RUN mkdir /docker-java-home/lib/jfr
+COPY jfr /docker-java-home/lib/jfr
+
 WORKDIR /app
 
-COPY docker-clients.zip /app/app.zip
+COPY docker-app.zip /app/app.zip
 RUN unzip /app/app.zip -d /app
 COPY run.scala /app
 

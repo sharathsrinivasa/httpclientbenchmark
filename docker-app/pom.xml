@@ -10,7 +10,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>docker-clients</artifactId>
+    <artifactId>docker-app</artifactId>
 
     <dependencies>
         <dependency>
@@ -40,6 +40,12 @@
         <dependency>
             <groupId>com.ss.benchmark</groupId>
             <artifactId>rxnetty-benchmark</artifactId>
+            <version>${project.version}</version>
+            <classifier>jar-with-dependencies</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.ss.benchmark</groupId>
+            <artifactId>reporter</artifactId>
             <version>${project.version}</version>
             <classifier>jar-with-dependencies</classifier>
         </dependency>

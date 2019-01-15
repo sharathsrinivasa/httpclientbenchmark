@@ -15,6 +15,33 @@ The application has help.
 docker run --rm -it crankydillo/crankydillo/http-client-benchmark --help
 ```
 
+## Running server and client tests locally on a 2015-ish Mac
+
+I'd use `-net=host` on linux.
+
+```sh
+docker run --name server \
+    -p 8080:8080 \
+    -it --rm \
+    crankydillo/http-client-benchmark \
+    server
+
+docker run \
+  -v /FILL_IN/metrics-csv:/metrics -e BM.METRICS.DIR=/metrics \
+  --link server:svr -ti --rm \
+  crankydillo/http-client-benchmark \
+  test all svr 8080 10000 40
+
+docker run \
+  -v /FILL_IN/metrics-csv:/reportdir -it --rm \
+  crankydillo/http-client-benchmark \
+  report /reportdir > out.html
+  
+open out.html
+```
+
+Of course, feel free to do whatever you want with directory names.
+
 # Customization of the `test` subcommand
 
 If you need customization (e.g. specifying Java's -Xmx value) beyond what the
@@ -26,7 +53,7 @@ TestNG.  It can be overridden like this:
 ```sh
 docker run --rm -it --entrypoint java crankydillo/http-client-benchmark \
     -Xmx6G \
-    -Dbm.host=10.176.14.217 -Dbm.port=8080 \
+    -Dbm.host=some.host -Dbm.port=8080 \
     -Dbm.test.executions=10 -Dbm.test.workers=2 \
     -Dbm.dropwizard.seconds=30 \
     -jar docker-clients/lib/rxnetty-benchmark-1.0.0-SNAPSHOT-jar-with-dependencies.jar \

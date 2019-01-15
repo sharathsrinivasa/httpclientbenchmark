@@ -1,0 +1,3 @@
+resolvers += Resolver.mavenLocal
+
+externalPom()
