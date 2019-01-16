@@ -245,7 +245,7 @@ public abstract class BasePerformanceTest {
 
     @Test(priority = 2, dataProvider = "nonblocking-executions", groups = {"nonblocking", "async"})
     public void testNonBlockingAsyncShortGET(Method m, String executionSizeName, Integer executions) {
-        String method = m.getName() + " - " + executionSizeName;
+        String method = parameterizedName(m, executionSizeName);
         LOGGER.debug("Start " + method);
 
         nonBlockingAsyncGET(
@@ -422,12 +422,12 @@ public abstract class BasePerformanceTest {
     public static Object[][] dataProviderMethod() {
         return new Object[][] {
                 { "Parameterized", NonBlockingVars.EXECUTIONS },
-                { "Pool size"    , HttpClientEngine.MAX_CONNECTION_POOL_SIZE }
+                { "Pool_Size"    , HttpClientEngine.MAX_CONNECTION_POOL_SIZE }
         };
     }
 
     private String parameterizedName(Method m, String executionSizeName) {
-        return m.getName() + "_" + executionSizeName;
+        return m.getName() + "-" + executionSizeName;
     }
 
 }
