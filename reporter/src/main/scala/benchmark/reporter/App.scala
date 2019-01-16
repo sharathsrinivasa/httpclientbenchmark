@@ -3,11 +3,18 @@ package benchmark.reporter
 import java.io.File
 
 import scala.io.Source
-import scala.util.Try
+import scala.util.{Success, Try}
 
 object App {
 
-  val formatter = java.text.NumberFormat.getInstance
+  val decimalFormatter = {
+    val fmt = java.text.NumberFormat.getInstance
+    fmt.setMaximumFractionDigits(2)
+    fmt.setMinimumFractionDigits(2)
+    fmt
+  }
+
+  val intFormatter = java.text.NumberFormat.getInstance
 
   case class TestCollateral(typ: String, client: String, method: String, results: File)
 
@@ -43,7 +50,12 @@ object App {
          }
          table {
            border-collapse: collapse;
-           padding: 3px;
+         }
+         th, td {
+           padding-top: 3px;
+           padding-bottom: 3px;
+           padding-left: 5px;
+           padding-right: 5px;
          }
          </style>
          </head>
@@ -54,35 +66,42 @@ object App {
       .filter  { _.typ == "errorRate" }
       .groupBy { _.method }
 
-    println(html("Error Rates", errorRates))
-
-    val timings =
+    val timings: Map[String, List[TestCollateral]] =
       testCollateral
         .filter  { _.typ == "timing" }
         .groupBy { _.method }
 
-    println(html("Timings", timings))
+    val sections: Seq[(String, List[List[TestCollateral]])] =
+      timings.toList.map { case (k, timingCollateral) =>
+        val collateralList =
+          errorRates.get(k)
+            .map { errorRateCollateral => List(errorRateCollateral, timingCollateral) }
+            .getOrElse(List(timingCollateral))
+        (k, collateralList)
+      }
+
+    sections
+      .sortBy { case (method, _) => method }
+      .foreach { case (method, collateralLists) =>
+        println(s"<h1>$method</h1>")
+        collateralLists.foreach { collateralList =>
+          collateralList.headOption.foreach { fst =>
+            println(s"<h3>${fst.typ}</h3>")
+          }
+          println(table(collateralList))
+        }
+      }
 
     println("</html>")
   }
 
-  // Yeah, this is getting pretty weak modeling:(:(
-  private def html(title: String, collateral: Map[String, List[TestCollateral]]): String =
-    s"""<h1>$title</h1>\n${
-      collateral
-        .toList
-        .sortBy { case (m, _) => m }
-        .map    { case (m, tcs) => html(m, tcs)
-    }.mkString("\n")}"""
-
-  private def html(method: String, collateral: List[TestCollateral]): String = {
+  private def table(collateral: List[TestCollateral]): String = {
     // don't have to close the file???
     val fileLines = Source.fromFile(collateral.head.results).getLines
     val headers = fileLines.next.split(",")
     def getData(f: File) = Source.fromFile(f).getLines.toList.last.split(",")
     val data = collateral.map { tc => (tc.client, getData(tc.results)) }
     s"""
-<h3>$method</h3>
 <table>
   <th>Client</th>${headers.map { h => s"<th>$h</th>"  }.mkString("") }
     ${data.map { case (client, data) =>
@@ -95,9 +114,13 @@ object App {
   // best attempt at formatting values that _may_ be numbers.
   // Clearly, this impl is not worried about performance!
   private def tryFormat(maybeNum: String): String = {
-    Try       { maybeNum.toInt }
-      .orElse { Try(maybeNum.toFloat) }
-      .map    { n => formatter.format(n) }
-      .getOrElse(maybeNum)
+    Try { maybeNum.toInt } match {
+      case Success(i) => intFormatter.format(i)
+      case _ =>
+        Try { maybeNum.toDouble } match {
+          case Success(d) => decimalFormatter.format(d)
+          case _ => maybeNum
+        }
+    }
   }
 }

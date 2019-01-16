@@ -21,6 +21,7 @@
         <module>reactornetty-benchmark</module>
         <module>rxnetty-benchmark</module>
         <module>apacheasync-benchmark</module>
+        <module>apachesync-benchmark</module>
         <module>asynchttpclient-benchmark</module>
         <module>gatling-stress</module>
         <module>docker-app</module>

@@ -10,35 +10,18 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>reactornetty-benchmark</artifactId>
-
-    <properties>
-        <reactornetty.version>0.8.4.RELEASE</reactornetty.version>
-    </properties>
-
-    <repositories>
-        <repository>
-            <id>public</id>
-            <url>https://repo.spring.io/snapshot</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+    <artifactId>apachesync-benchmark</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.6</version>
+        </dependency>
         <dependency>
             <groupId>com.ss.benchmark</groupId>
             <artifactId>benchmark-common</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.projectreactor.netty</groupId>
-            <artifactId>reactor-netty</artifactId>
-            <version>${reactornetty.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>

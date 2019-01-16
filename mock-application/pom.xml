@@ -33,7 +33,7 @@
         </dependency>
         <dependency>
             <groupId>com.ss.benchmark</groupId>
-            <artifactId>benchmarkcommon</artifactId>
+            <artifactId>benchmark-common</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

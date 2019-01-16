@@ -37,8 +37,8 @@ public class Engine implements HttpClientEngine {
     }
 
     @Override
-    public String blockingGET(String uri) {
-        final HttpGet request = new HttpGet(baseUrl + uri);
+    public String blockingGET(String path) {
+        final HttpGet request = new HttpGet(baseUrl + path);
         request.setConfig(requestConfig);
         Future<HttpResponse> responseFuture = client.execute(request, null);
         try {
@@ -50,9 +50,9 @@ public class Engine implements HttpClientEngine {
     }
 
     @Override
-    public String blockingPOST(String uri, String body) {
+    public String blockingPOST(String path, String body) {
         final StringEntity stringEntity = new StringEntity(body, "UTF-8");
-        final HttpPost request = new HttpPost(baseUrl + uri);
+        final HttpPost request = new HttpPost(baseUrl + path);
 
         request.addHeader("content-type", "application/json");
         stringEntity.setContentType("application/json");
@@ -68,10 +68,10 @@ public class Engine implements HttpClientEngine {
     }
 
     @Override
-    public CompletableFuture<String> nonblockingGET(String uri) {
+    public CompletableFuture<String> nonblockingGET(String path) {
         final CompletableFuture<String> cfResponse = new CompletableFuture<>();
 
-        HttpGet request = new HttpGet(baseUrl + uri);
+        HttpGet request = new HttpGet(baseUrl + path);
         request.setConfig(requestConfig);
 
         client.execute(request, new FutureCallback<>() {
@@ -98,10 +98,10 @@ public class Engine implements HttpClientEngine {
     }
 
     @Override
-    public CompletableFuture<String> nonblockingPOST(String uri, String body) {
+    public CompletableFuture<String> nonblockingPOST(String path, String body) {
         final CompletableFuture<String> cfResponse = new CompletableFuture<>();
 
-        HttpPost request = new HttpPost(baseUrl + uri);
+        HttpPost request = new HttpPost(baseUrl + path);
         request.addHeader("content-type", "application/json");
         request.addHeader("Host", "localhost");
         StringEntity stringEntity = new StringEntity(body, "UTF-8");

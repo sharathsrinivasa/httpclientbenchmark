@@ -33,6 +33,12 @@
         </dependency>
         <dependency>
             <groupId>com.ss.benchmark</groupId>
+            <artifactId>apachesync-benchmark</artifactId>
+            <version>${project.version}</version>
+            <classifier>jar-with-dependencies</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.ss.benchmark</groupId>
             <artifactId>reactornetty-benchmark</artifactId>
             <version>${project.version}</version>
             <classifier>jar-with-dependencies</classifier>

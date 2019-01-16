@@ -4,6 +4,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import static com.ss.benchmark.httpclient.common.Exceptions.rethrowChecked;
+
 public interface HttpClientEngine extends Closeable {
 
     //All times are milliseconds unless otherwise noted
@@ -16,13 +18,17 @@ public interface HttpClientEngine extends Closeable {
      */
     void createClient(String host, int port);
 
-    String blockingGET(String uri);
+    default String blockingGET(String path) {
+        return rethrowChecked(() -> nonblockingGET(path).get());
+    }
 
-    String blockingPOST(String uri, String body);
+    default String blockingPOST(String path, String body) {
+        return rethrowChecked(() -> nonblockingPOST(path, body).get());
+    }
 
-    CompletableFuture<String> nonblockingGET(String uri);
+    CompletableFuture<String> nonblockingGET(String path);
 
-    CompletableFuture<String> nonblockingPOST(String uri, String body);
+    CompletableFuture<String> nonblockingPOST(String path, String body);
 
     default String url(String host, int port) {
         return "http://" + host + ":" + port;
@@ -30,4 +36,6 @@ public interface HttpClientEngine extends Closeable {
 
     @Override
     default void close() throws IOException {}
+
+
 }
