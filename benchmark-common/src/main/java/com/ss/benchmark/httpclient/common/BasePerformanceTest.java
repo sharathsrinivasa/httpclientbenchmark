@@ -15,6 +15,22 @@ import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 /**
+ * Base class for perform some rudimentary performance tests of
+ * HTTP client libraries.  Orchestrated by TestNG.
+ * <p></p>
+ * Each client library needs to implement {@link HttpClientEngine}, which
+ * exposes both synchronous and asynchronous modes.
+ * </p>
+ * The test names have the following convention:
+ * <dl>
+ * <dt>testBlockingSyncXyx</dt>
+ * <dd>Test the client's synchronous mode in blocking scenarios</dd>
+ * <dt>testBlockingAsyncXyx</dt>
+ * <dd>Test the client's asynchronous mode in blocking scenarios</dd>
+ * <dt>testNonBlockingAsyncXyx</dt>
+ * <dd>Test the client's asynchronous mode in non-blocking scenarios</dd>
+ * </dl>
+ * </dl>
  * @author sharath.srinivasa
  */
 @Test(groups = "performance")
