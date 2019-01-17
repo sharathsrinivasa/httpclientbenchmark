@@ -37,7 +37,7 @@ public class Engine implements HttpClientEngine {
         return requestSender
                 .responseSingle((res, body) -> {
                     if (res.status().code() != 200) {
-                        Mono.error(new IllegalStateException("Unexpected response code : " + res.status().code()));
+                        Mono.error(new RuntimeException("Unexpected response code : " + res.status().code()));
                     }
                     return body;
                 })
@@ -56,7 +56,7 @@ public class Engine implements HttpClientEngine {
                 .send(ByteBufFlux.fromString(Flux.just(body)))
                 .responseSingle((res, responseBody) -> {
                     if (res.status().code() != 200) {
-                        Mono.error(new IllegalStateException("Unexpected response code : " + res.status().code()));
+                        Mono.error(new RuntimeException("Unexpected response code : " + res.status().code()));
                     }
                     return responseBody;
                 })
@@ -76,7 +76,7 @@ public class Engine implements HttpClientEngine {
         requestSender
                 .responseSingle((res, body) -> {
                     if (res.status().code() != 200) {
-                        Mono.error(new IllegalStateException("Unexpected response code : " + res.status().code()));
+                        Mono.error(new RuntimeException("Unexpected response code : " + res.status().code()));
                     }
                     return body;
                 })
@@ -101,7 +101,7 @@ public class Engine implements HttpClientEngine {
         requestSender
                 .responseSingle((res, resBody) -> {
                     if (res.status().code() != 200) {
-                        Mono.error(new IllegalStateException("Unexpected response code : " + res.status().code()));
+                        Mono.error(new RuntimeException("Unexpected response code : " + res.status().code()));
                     }
                     return resBody;
                 })

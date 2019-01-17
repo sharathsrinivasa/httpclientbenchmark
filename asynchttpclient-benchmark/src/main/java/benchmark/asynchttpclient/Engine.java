@@ -56,7 +56,9 @@ public class Engine implements HttpClientEngine {
                 .toCompletableFuture()
                 .thenApply(resp -> {
                     if (resp.getStatusCode() != 200) {
-                        // TODO
+                        // consume response and then throw exception
+                        resp.getResponseBody();
+                        throw new RuntimeException("Unexpected response code : " + resp.getStatusCode());
                     }
                     return rethrowChecked(() -> new String(resp.getResponseBodyAsBytes(), StandardCharsets.UTF_8));
                 });

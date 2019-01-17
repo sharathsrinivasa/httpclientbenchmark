@@ -31,3 +31,4 @@ test-output/
 .settings/
 .idea
 *.iml
+.java-version
