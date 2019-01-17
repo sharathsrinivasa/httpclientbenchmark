@@ -56,7 +56,7 @@ public class Engine implements HttpClientEngine {
         return request.flatMap(response -> {
             int status = response.getStatus().code();
             if (status != 200) {
-                throw new IllegalStateException("Unexpected response code: " + status);
+                throw new RuntimeException("Unexpected response code: " + status);
             }
             return response.getContent();
         }).map(buffer -> {
