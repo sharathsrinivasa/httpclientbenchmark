@@ -38,7 +38,7 @@ submit requests to this.
 To start the server:
 
 ```sh
-mvn -pl mockapplication compile exec:java
+mvn -pl mock-application compile exec:java
 ```
 
 ### Running the client load tests
