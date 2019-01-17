@@ -18,6 +18,10 @@ public interface HttpClientEngine extends Closeable {
      */
     void createClient(String host, int port);
 
+    CompletableFuture<String> nonblockingGET(String path);
+
+    CompletableFuture<String> nonblockingPOST(String path, String body);
+
     default String blockingGET(String path) {
         return rethrowChecked(() -> nonblockingGET(path).get());
     }
@@ -25,10 +29,6 @@ public interface HttpClientEngine extends Closeable {
     default String blockingPOST(String path, String body) {
         return rethrowChecked(() -> nonblockingPOST(path, body).get());
     }
-
-    CompletableFuture<String> nonblockingGET(String path);
-
-    CompletableFuture<String> nonblockingPOST(String path, String body);
 
     default String url(String host, int port) {
         return "http://" + host + ":" + port;

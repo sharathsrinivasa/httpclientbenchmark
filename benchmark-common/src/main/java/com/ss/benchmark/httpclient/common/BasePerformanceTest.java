@@ -46,7 +46,7 @@ public abstract class BasePerformanceTest {
             Integer.parseInt(System.getProperty("bm.dropwizard.seconds", "30"));
 
     public static class BlockingVars {
-        protected static final int EXECUTIONS = 5_000;
+        protected static final int EXECUTIONS = 10_000;
         protected static final int WORKERS = 40;
     }
 
