@@ -28,23 +28,23 @@ public class Engine implements HttpClientEngine {
     }
 
     @Override
-    public String blockingGET(String uri) {
-        return businessLogic(client.createGet(uri)).toBlocking().first();
+    public String blockingGET(String path) {
+        return businessLogic(client.createGet(path)).toBlocking().first();
     }
 
     @Override
-    public String blockingPOST(String uri, String body) {
-        return businessLogic(mkPost(uri, body)).toBlocking().first();
+    public String blockingPOST(String path, String body) {
+        return businessLogic(mkPost(path, body)).toBlocking().first();
     }
 
     @Override
-    public CompletableFuture<String> nonblockingGET(String uri) {
-        return toCompletableFuture(businessLogic(client.createGet(uri)));
+    public CompletableFuture<String> nonblockingGET(String path) {
+        return toCompletableFuture(businessLogic(client.createGet(path)));
     }
 
     @Override
-    public CompletableFuture<String> nonblockingPOST(String uri, String body) {
-        return toCompletableFuture(businessLogic(mkPost(uri, body)));
+    public CompletableFuture<String> nonblockingPOST(String path, String body) {
+        return toCompletableFuture(businessLogic(mkPost(path, body)));
     }
 
     private Observable<HttpClientResponse<ByteBuf>> mkPost(String uri, String body) {

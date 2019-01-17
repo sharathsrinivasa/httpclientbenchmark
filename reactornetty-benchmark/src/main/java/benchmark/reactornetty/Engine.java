@@ -29,10 +29,10 @@ public class Engine implements HttpClientEngine {
     }
 
     @Override
-    public String blockingGET(String uri) {
+    public String blockingGET(String path) {
         reactor.netty.http.client.HttpClient.RequestSender requestSender = client
                 .request(HttpMethod.GET)
-                .uri(uri);
+                .uri(path);
 
         return requestSender
                 .responseSingle((res, body) -> {
@@ -47,12 +47,12 @@ public class Engine implements HttpClientEngine {
     }
 
     @Override
-    public String blockingPOST(String uri, String body) {
+    public String blockingPOST(String path, String body) {
 
         return  client
                 .headers(entries -> entries.add("Content-Type", "application/json" ))
                 .post()
-                .uri(uri)
+                .uri(path)
                 .send(ByteBufFlux.fromString(Flux.just(body)))
                 .responseSingle((res, responseBody) -> {
                     if (res.status().code() != 200) {
@@ -66,12 +66,12 @@ public class Engine implements HttpClientEngine {
     }
 
     @Override
-    public CompletableFuture<String> nonblockingGET(String uri) {
+    public CompletableFuture<String> nonblockingGET(String path) {
         final CompletableFuture<String> cfResponse = new CompletableFuture<>();
 
         reactor.netty.http.client.HttpClient.RequestSender requestSender = client
                 .request(HttpMethod.GET)
-                .uri(uri);
+                .uri(path);
 
         requestSender
                 .responseSingle((res, body) -> {
@@ -90,12 +90,12 @@ public class Engine implements HttpClientEngine {
     }
 
     @Override
-    public CompletableFuture<String> nonblockingPOST(String uri, String body) {
+    public CompletableFuture<String> nonblockingPOST(String path, String body) {
         final CompletableFuture<String> cfResponse = new CompletableFuture<>();
 
         reactor.netty.http.client.HttpClient.ResponseReceiver<?> requestSender = client
                 .post()
-                .uri(uri)
+                .uri(path)
                 .send(ByteBufFlux.fromString(Flux.just(body)));
 
         requestSender

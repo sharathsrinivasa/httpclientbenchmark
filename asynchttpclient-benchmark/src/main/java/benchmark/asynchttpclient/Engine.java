@@ -5,8 +5,9 @@ import org.asynchttpclient.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+
+import static com.ss.benchmark.httpclient.common.Exceptions.rethrowChecked;
 
 public class Engine implements HttpClientEngine {
 
@@ -30,12 +31,12 @@ public class Engine implements HttpClientEngine {
 
     @Override
     public String blockingGET(String path) {
-        return suppressChecked(() -> nonblockingGET(path).get());
+        return rethrowChecked(() -> nonblockingGET(path).get());
     }
 
     @Override
     public String blockingPOST(String path, String body) {
-        return suppressChecked(() -> nonblockingPOST(path, body).get());
+        return rethrowChecked(() -> nonblockingPOST(path, body).get());
     }
 
     @Override
@@ -57,7 +58,7 @@ public class Engine implements HttpClientEngine {
                     if (resp.getStatusCode() != 200) {
                         // TODO
                     }
-                    return suppressChecked(() -> new String(resp.getResponseBodyAsBytes(), StandardCharsets.UTF_8));
+                    return rethrowChecked(() -> new String(resp.getResponseBodyAsBytes(), StandardCharsets.UTF_8));
                 });
     }
 
@@ -68,16 +69,6 @@ public class Engine implements HttpClientEngine {
         return baseUrl + "/" + path;
     }
 
-    private <T> T suppressChecked(Callable<T> c) {
-        try {
-            return c.call();
-        } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException)e;
-            }
-            throw new RuntimeException("Repackaged checked exception as unchecked.  See cause.", e);
-        }
-    }
 
     @Override
     public void close() throws IOException {

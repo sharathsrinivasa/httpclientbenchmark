@@ -9,12 +9,28 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.time.Instant;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.*;
+import java.util.function.Supplier;
 
 /**
+ * Base class for perform some rudimentary performance tests of
+ * HTTP client libraries.  Orchestrated by TestNG.
+ * <p></p>
+ * Each client library needs to implement {@link HttpClientEngine}, which
+ * exposes both synchronous and asynchronous modes.
+ * </p>
+ * The test names have the following convention:
+ * <dl>
+ * <dt>testBlockingSyncXyx</dt>
+ * <dd>Test the client's synchronous mode in blocking scenarios</dd>
+ * <dt>testBlockingAsyncXyx</dt>
+ * <dd>Test the client's asynchronous mode in blocking scenarios</dd>
+ * <dt>testNonBlockingAsyncXyx</dt>
+ * <dd>Test the client's asynchronous mode in non-blocking scenarios</dd>
+ * </dl>
+ * </dl>
  * @author sharath.srinivasa
  */
 @Test(groups = "performance")
@@ -29,8 +45,14 @@ public abstract class BasePerformanceTest {
     protected static final int DROPWIZARD_REPORTER_SECONDS =
             Integer.parseInt(System.getProperty("bm.dropwizard.seconds", "30"));
 
-    protected static final int EXECUTIONS = 10_000;
-    protected static final int WORKERS = 40;
+    public static class BlockingVars {
+        protected static final int EXECUTIONS = 5_000;
+        protected static final int WORKERS = 40;
+    }
+
+    public static class NonBlockingVars {
+        static final int EXECUTIONS = 1_000;
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasePerformanceTest.class);
 
@@ -38,9 +60,20 @@ public abstract class BasePerformanceTest {
     protected final ScheduledReporter reporter = ConsoleReporter.forRegistry(metricRegistry).convertDurationsTo(TimeUnit.MILLISECONDS).build();
     private ScheduledReporter csvReporter;
 
-    private ConcurrentHashMap<String, CountDownLatch> latches = new ConcurrentHashMap<>();
+    // These blockingLatches are for the blocking cases.
+    private ConcurrentHashMap<String, CountDownLatch> blockingLatches = new ConcurrentHashMap<>();
 
+    private Set<CountDownLatch> nonBlockingLatches = new HashSet<>();
+
+    /**
+     * HTTP client under test.
+     */
     private HttpClientEngine client;
+
+    /**
+     * HTTP client libraries implement this to be tested.
+     */
+    protected abstract HttpClientEngine getClient();
 
     @BeforeTest
     public void beforeTest() {
@@ -85,14 +118,16 @@ public abstract class BasePerformanceTest {
 
     @AfterMethod
     public void afterMethod() {
-        try {
-            CountDownLatch latch = latches.remove(Thread.currentThread().getName());
-            if (latch != null)
+        // Yes, this sucks, but I haven't thought of a low-cost refactor.
+        Exceptions.rethrowChecked(() -> {
+            CountDownLatch blockingLatch = blockingLatches.remove(Thread.currentThread().getName());
+            if (blockingLatch != null)
+                blockingLatch.await();
+            for (CountDownLatch latch : nonBlockingLatches) {
                 latch.await();
-        } catch (
-                InterruptedException e) {
-            e.printStackTrace();
-        }
+            }
+            return null;
+        });
         LOGGER.debug("Completed");
     }
 
@@ -103,23 +138,29 @@ public abstract class BasePerformanceTest {
         LOGGER.debug("Start " + method);
 
         for (int i = 0; i < HttpClientEngine.MAX_CONNECTION_POOL_SIZE; i++) {
-            syncGET(metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
+            syncGET(
+                    MOCK_SHORT_URL,
+                    Payloads.SHORT,
+                    metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                     metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
         }
     }
 
-    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"blocking"})
-    public void testBlockingShortGET(Method m) {
+    @Test(priority = 1, invocationCount = BlockingVars.EXECUTIONS, threadPoolSize = BlockingVars.WORKERS, groups = {"blocking"})
+    public void testBlockingSyncShortGET(Method m) {
         String method = m.getName();
 
         LOGGER.debug("Start " + method);
 
-        syncGET(metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
+        syncGET(
+                MOCK_SHORT_URL,
+                Payloads.SHORT,
+                metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
     }
 
-    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"blocking"})
-    public void testBlockingShortShortPOST(Method m) {
+    @Test(priority = 1, invocationCount = BlockingVars.EXECUTIONS, threadPoolSize = BlockingVars.WORKERS, groups = {"blocking"})
+    public void testBlockingSyncShortShortPOST(Method m) {
         String method = m.getName();
         LOGGER.debug("Start " + method);
 
@@ -130,8 +171,8 @@ public abstract class BasePerformanceTest {
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
     }
 
-    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"blocking"})
-    public void testBlockingShortLongPOST(Method m) {
+    @Test(priority = 1, invocationCount = BlockingVars.EXECUTIONS, threadPoolSize = BlockingVars.WORKERS, groups = {"blocking", "sync"})
+    public void testBlockingSyncShortLongPOST(Method m) {
         String method = m.getName();
         LOGGER.debug("Start " + method);
 
@@ -142,8 +183,8 @@ public abstract class BasePerformanceTest {
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
     }
 
-    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"blocking"})
-    public void testBlockingLongLongPOST(Method m) {
+    @Test(priority = 1, invocationCount = BlockingVars.EXECUTIONS, threadPoolSize = BlockingVars.WORKERS, groups = {"blocking", "sync"})
+    public void testBlockingSyncLongLongPOST(Method m) {
         String method = m.getName();
         LOGGER.debug("Start " + method);
 
@@ -154,137 +195,239 @@ public abstract class BasePerformanceTest {
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
     }
 
-    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"nonblocking"})
-    public void testNonBlockingShortGET(Method m) {
+    @Test(priority = 1, invocationCount = BlockingVars.EXECUTIONS, threadPoolSize = BlockingVars.WORKERS, groups = {"locking", "async"})
+    public void testBlockingAsyncShortGET(Method m) {
         String method = m.getName();
         LOGGER.debug("Start " + method);
 
-        asyncGET(new CountDownLatch(1),
+        blockingAsyncGET(
+                MOCK_SHORT_URL,
+                Payloads.SHORT,
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
     }
 
-    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"nonblocking"})
-    public void testNonBlockingShortShortPOST(Method m) {
+    @Test(priority = 1, invocationCount = BlockingVars.EXECUTIONS, threadPoolSize = BlockingVars.WORKERS, groups = {"blocking", "async"})
+    public void testBlockingAsyncShortShortPOST(Method m) {
         String method = m.getName();
         LOGGER.debug("Start " + method);
 
-        asyncPOST(MOCK_SHORT_URL,
+        blockingAsyncPOST(MOCK_SHORT_URL,
                 Payloads.SHORT,
                 Payloads.SHORT,
-                new CountDownLatch(1),
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
     }
 
-    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"nonblocking"})
-    public void testNonBlockingShortLongPOST(Method m) {
+    @Test(priority = 1, invocationCount = BlockingVars.EXECUTIONS, threadPoolSize = BlockingVars.WORKERS, groups = {"blocking", "async"})
+    public void testBlockingAsyncShortLongPOST(Method m) {
         String method = m.getName();
         LOGGER.debug("Start " + method);
 
-        asyncPOST(MOCK_LONG_URL,
+        blockingAsyncPOST(MOCK_LONG_URL,
                 Payloads.SHORT,
                 Payloads.LONG,
-                new CountDownLatch(1),
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
     }
 
-    @Test(priority = 1, invocationCount = EXECUTIONS, threadPoolSize = WORKERS, groups = {"nonblocking"})
-    public void testNonBlockingLongLongPOST(Method m) {
+    @Test(priority = 1, invocationCount = BlockingVars.EXECUTIONS, threadPoolSize = BlockingVars.WORKERS, groups = {"blocking", "async"})
+    public void testBlockingAsyncLongLongPOST(Method m) {
         String method = m.getName();
         LOGGER.debug("Start " + method);
 
-        asyncPOST(MOCK_LONG_URL,
+        blockingAsyncPOST(MOCK_LONG_URL,
                 Payloads.LONG,
                 Payloads.LONG,
-                new CountDownLatch(1),
                 metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
                 metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
     }
 
-    @Test(priority = 9, groups = {"nonblocking"})
-    public void testSingleThreadedLoadingUpConnectionPool(Method m) {
-        String method = m.getName();
+    @Test(priority = 2, dataProvider = "nonblocking-executions", groups = {"nonblocking", "async"})
+    public void testNonBlockingAsyncShortGET(Method m, String executionSizeName, Integer executions) {
+        String method = parameterizedName(m, executionSizeName);
         LOGGER.debug("Start " + method);
 
-        CountDownLatch latch = new CountDownLatch(HttpClientEngine.MAX_CONNECTION_POOL_SIZE);
-        latches.put(Thread.currentThread().getName(), latch);
+        nonBlockingAsyncGET(
+                executions,
+                MOCK_SHORT_URL,
+                Payloads.SHORT,
+                metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
+                metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
+    }
 
-        for (int i = 0; i < HttpClientEngine.MAX_CONNECTION_POOL_SIZE; i++) {
-            asyncGET(latch,
-                    metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
-                    metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
+    @Test(priority = 2, dataProvider = "nonblocking-executions", groups = {"nonblocking", "async"})
+    public void testNonBlockingAsyncShortShortPOST(Method m, String executionSizeName, Integer executions) {
+        String method = parameterizedName(m, executionSizeName);
+        LOGGER.debug("Start " + method);
 
+        nonBlockingAsyncPOST(
+                executions,
+                MOCK_SHORT_URL,
+                Payloads.SHORT,
+                Payloads.SHORT,
+                metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
+                metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
+
+    }
+
+    @Test(priority = 2, dataProvider = "nonblocking-executions", groups = {"nonblocking", "async"})
+    public void testNonBlockingAsyncLongLongPOST(Method m, String executionSizeName, Integer executions) {
+        String method = parameterizedName(m, executionSizeName);
+        LOGGER.debug("Start " + method);
+
+        nonBlockingAsyncPOST(
+                executions,
+                MOCK_LONG_URL,
+                Payloads.LONG,
+                Payloads.LONG,
+                metricRegistry.timer(MetricRegistry.name(this.getClass(), method, "timing")),
+                metricRegistry.counter(MetricRegistry.name(this.getClass(), method, "errorRate")));
+    }
+
+    private void nonBlockingAsyncGET(
+            int executions,
+            String url,
+            String expectedResponsePayload,
+            Timer timer,
+            Counter errors
+    ) {
+        CountDownLatch latch = new CountDownLatch(executions);
+        nonBlockingLatches.add(latch);
+        for (int i = 0; i < executions; i++) {
+            asyncGET(url, expectedResponsePayload, latch, timer, errors);
         }
     }
 
-    protected void asyncGET(CountDownLatch latch, Timer timer, Counter errors) {
-        latches.putIfAbsent(Thread.currentThread().getName(), latch);
-
-        Timer.Context ctx = timer.time();
-
-        CompletableFuture<String> cf = client.nonblockingGET(HELLO_URL);
-        cf.handle((result, ex) -> {
-            ctx.stop();
-            if (!Payloads.HELLO.equals(result)) {
-                errors.inc();
-            }
-            latch.countDown();
-            return result;
-        });
+    private void nonBlockingAsyncPOST(
+            int executions,
+            String url,
+            String payload,
+            String expectedResponsePayload,
+            Timer timer,
+            Counter errors
+    ) {
+        CountDownLatch latch = new CountDownLatch(executions);
+        nonBlockingLatches.add(latch);
+        for (int i = 0; i < executions; i++) {
+            asyncPOST(url, payload, expectedResponsePayload, latch, timer, errors);
+        }
     }
 
-    protected void asyncPOST(String url, String payload, String expect, CountDownLatch latch, Timer timer, Counter
-            errors) {
-        if (expect == null)
-            throw new IllegalArgumentException("expected response payload can not be null");
-
-        latches.putIfAbsent(Thread.currentThread().getName(), latch);
-
-        Timer.Context ctx = timer.time();
-
-        CompletableFuture<String> cf = client.nonblockingPOST(url, payload);
-        cf.handle((result, ex) -> {
-            ctx.stop();
-            if (ex != null || !expect.equals(result)) {
-                errors.inc();
-            }
-            latch.countDown();
-            return result;
-        });
+    private void blockingAsyncGET(
+            String url,
+            String expectedResponsePayload,
+            Timer timer,
+            Counter errors
+    ) {
+        CountDownLatch latch = new CountDownLatch(1);
+        blockingLatches.putIfAbsent(Thread.currentThread().getName(), latch);
+        asyncGET(url, expectedResponsePayload, latch, timer, errors);
     }
 
-    protected void syncGET(Timer timer, Counter errors) {
+    private void blockingAsyncPOST(
+            String url,
+            String payload,
+            String expectedResponsePayload,
+            Timer timer,
+            Counter errors
+    ) {
+        CountDownLatch latch = new CountDownLatch(1);
+        blockingLatches.putIfAbsent(Thread.currentThread().getName(), latch);
+        asyncPOST(url, payload, expectedResponsePayload, latch, timer, errors);
+    }
+
+    private void asyncGET(String url, String expectedResponsePayload, CountDownLatch latch, Timer timer, Counter errors) {
+        doAsync(
+                () -> client.nonblockingGET(url),
+                expectedResponsePayload,
+                latch,
+                timer,
+                errors
+        );
+    }
+
+    private void asyncPOST(String url, String payload, String expect, CountDownLatch latch, Timer timer, Counter errors) {
+        doAsync(
+                () -> client.nonblockingPOST(url, payload),
+                expect,
+                latch,
+                timer,
+                errors
+        );
+    }
+
+    private void syncGET(String url, String expectedResponsePayload, Timer timer, Counter errors) {
+        doSync(
+                () -> client.blockingGET(url),
+                expectedResponsePayload,
+                timer,
+                errors
+        );
+    }
+
+    private void syncPOST(String url, String payload, String expectedResponsePayload, Timer timer, Counter errors) {
+        doSync(
+                () -> client.blockingPOST(url, payload),
+                expectedResponsePayload,
+                timer,
+                errors
+        );
+    }
+
+    // I felt like the code below was tricky enough to not duplicate it between the (a)syncXYZ cases; however,
+    // if you feel this is adversely affecting performance, we can go back to duplicating it..
+    private void doAsync(
+            Supplier<CompletableFuture<String>> op,
+            String expectedResponsePayload,
+            CountDownLatch latch,
+            Timer timer,
+            Counter errors
+    ) {
+        Timer.Context ctx = timer.time();
+        try {
+            CompletableFuture<String> cf = op.get();
+            cf.handle((result, ex) -> {
+                if (ex != null || !expectedResponsePayload.equals(result)) {
+                    errors.inc();
+                } else {
+                    ctx.stop(); // the goal is to not count error cases in the timing metrics
+                }
+                latch.countDown();
+                return result;
+            });
+        } catch (Exception e) {
+            errors.inc();
+            latch.countDown();  // not sure on this..
+        }
+    }
+
+    private void doSync(Supplier<String> op, String expectedResponsePayload, Timer timer, Counter errors) {
         Timer.Context ctx = timer.time();
         String response = null;
         try {
-            response = client.blockingGET(HELLO_URL);
+            response = op.get();
+            ctx.stop();
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
         } finally {
-            ctx.stop();
-            if (!Payloads.HELLO.equals(response))
+            // I guess if an exception is thrown, this will be true..
+            if (!expectedResponsePayload.equals(response)) {
                 errors.inc();
+            }
         }
     }
 
-    protected void syncPOST(String url, String payload, String expect, Timer timer, Counter errors) {
-        if (expect == null)
-            throw new IllegalArgumentException("expected response payload can not be null");
-
-        Timer.Context ctx = timer.time();
-        String response = null;
-        try {
-            response = client.blockingPOST(url, payload);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-        } finally {
-            ctx.stop();
-            if (!expect.equals(response))
-                errors.inc();
-        }
+    @DataProvider(name = "nonblocking-executions")
+    public static Object[][] dataProviderMethod() {
+        return new Object[][] {
+                { "Parameterized", NonBlockingVars.EXECUTIONS },
+                { "Pool_Size"    , HttpClientEngine.MAX_CONNECTION_POOL_SIZE }
+        };
     }
 
-    protected abstract HttpClientEngine getClient();
+    private String parameterizedName(Method m, String executionSizeName) {
+        return m.getName() + "-" + executionSizeName;
+    }
+
 }

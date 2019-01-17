@@ -26,14 +26,14 @@ docker run --name server \
     crankydillo/http-client-benchmark \
     server
 
-docker run \
-  -v /FILL_IN/metrics-csv:/metrics -e BM.METRICS.DIR=/metrics \
+MET_DIR=/FILL_IN; docker run \
+  -v $MET_DIR:/metrics -e BM.METRICS.DIR=/metrics \
   --link server:svr -ti --rm \
   crankydillo/http-client-benchmark \
   test all svr 8080 10000 40
 
-docker run \
-  -v /FILL_IN/metrics-csv:/reportdir -it --rm \
+MET_DIR=/FILL_IN; docker run \
+  -v $MET_DIR:/reportdir -it --rm \
   crankydillo/http-client-benchmark \
   report /reportdir > out.html
   
@@ -42,7 +42,7 @@ open out.html
 
 Of course, feel free to do whatever you want with directory names.
 
-# Customization of the `test` subcommand
+# Customization of the `test` sub-command
 
 If you need customization (e.g. specifying Java's -Xmx value) beyond what the
 arguments give you, you'll need to override the container's entrypoint.
