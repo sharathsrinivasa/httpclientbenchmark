@@ -1,0 +1,11 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >  
+<suite name="SuiteAll" verbose="1">
+    <listeners>
+        <listener class-name="com.ss.benchmark.httpclient.common.Transformer"/>
+    </listeners>
+    <test name="TestAll">
+        <packages>  
+            <package name="benchmark.asynchttpclient"/>
+        </packages>  
+    </test>  
+</suite>

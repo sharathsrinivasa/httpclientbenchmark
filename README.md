@@ -34,6 +34,11 @@ mvn -Pperformance -pl reactornettybenchmark verify
 mvn -Pperformance -pl rxnettybenchmark verify
 ```
 
+### apacheasyncbenchmark
+
+```sh
+mvn -Pperformance -pl apacheasyncbenchmark verify
+```
 # Configuration
 
 ### Number of test runs
