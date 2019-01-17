@@ -1,5 +1,5 @@
-# Issue
-This is an attempt to compare performance between rxnetty and reactor netty http clients.
+# Description
+This is an attempt to compare performance between different http clients. Currently, we are benchmarking rxnetty, reactor netty, Apache Sync N Async and AsyncHttpClient clients.
 
 # Building
 
@@ -55,8 +55,4 @@ mvn -Pperformance -pl reactornetty-benchmark verify
 
 ### Number of test runs
 
-By default, it is configured to 10,000. 
-
-# Issues Observed
-
-See github issues?
+By default, it is configured to 10,000.
