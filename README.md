@@ -1,5 +1,16 @@
 # Description
-This is an attempt to compare performance between different http clients. Currently, we are benchmarking rxnetty, reactor netty, Apache Sync N Async and AsyncHttpClient clients.
+
+This is an attempt to compare performance between different http clients.
+Currently, we are benchmarking rxnetty, reactor netty, Apache Sync N Async and
+AsyncHttpClient clients.
+
+# Results
+
+We are maintaining benchmark results in this repository's Issues section.  This
+allows us to have discussions about them as well as easily add supporting
+files.  When new results are added, the previous ones should be closed (there
+should only be one set of results in Open state).  The issue should have some
+pointer (i.e. SHA) to the code that was used to produce them.
 
 # Building
 
