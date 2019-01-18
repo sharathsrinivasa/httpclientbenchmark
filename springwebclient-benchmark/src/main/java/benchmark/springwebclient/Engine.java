@@ -31,45 +31,27 @@ public class Engine implements HttpClientEngine {
 
     @Override
     public String blockingGET(String path) {
-        return webClient
-                .get()
-                .uri(path)
-                .exchange()
-                .flatMap(res -> consumeResponse(res))
+        return performGET(path)
                 .doOnError(t -> System.err.println("Failed requesting server: " + t.getMessage()))
                 .block();
-    }
+         }
 
     @Override
-    public String blockingPOST(String path, String body) {
-        return webClient
-                .method(HttpMethod.POST)
-                .uri(path)
-                .body(BodyInserters.fromPublisher(Mono.just(body), String.class))
-                .exchange()
-                .flatMap(res -> consumeResponse(res))
+    public String blockingPOST(String path, String reqPayload) {
+        return performPOST(path, reqPayload )
                 .doOnError(t -> System.err.println("Failed requesting server: " + t.getMessage()))
                 .block();
     }
 
     @Override
     public CompletableFuture<String> nonblockingGET(String path) {
-        return webClient
-                .get()
-                .uri(path)
-                .exchange()
-                .flatMap(res -> consumeResponse(res))
+        return  performGET(path)
                 .toFuture();
     }
 
     @Override
-    public CompletableFuture<String> nonblockingPOST(String path, String body) {
-        return webClient
-                .method(HttpMethod.POST)
-                .uri(path)
-                .body(BodyInserters.fromPublisher(Mono.just(body), String.class ))
-                .exchange()
-                .flatMap(res -> consumeResponse(res))
+    public CompletableFuture<String> nonblockingPOST(String path, String reqPayload) {
+        return performPOST(path, reqPayload)
                 .toFuture();
     }
 
@@ -78,6 +60,23 @@ public class Engine implements HttpClientEngine {
             Mono.error(new RuntimeException("Unexpected response code : " + res.rawStatusCode()));
         }
         return res.bodyToMono(String.class);
+    }
+
+    private Mono<String> performGET(String path) {
+        return webClient
+                .get()
+                .uri(path)
+                .exchange()
+                .flatMap(resp -> consumeResponse(resp));
+    }
+
+    private Mono<String> performPOST(String path, String reqPayload) {
+        return webClient
+                .method(HttpMethod.POST)
+                .uri(path)
+                .body(BodyInserters.fromPublisher(Mono.just(reqPayload), String.class ))
+                .exchange()
+                .flatMap(resp -> consumeResponse(resp));
     }
 
     private HttpClient createReactorNettyClient() {

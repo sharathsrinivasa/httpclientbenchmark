@@ -30,6 +30,45 @@ public class Engine implements HttpClientEngine {
 
     @Override
     public String blockingGET(String path) {
+        return performGET(path)
+                .doOnError(t -> System.err.println("Failed requesting server: " + t.getMessage()))
+                .block();
+    }
+
+    @Override
+    public String blockingPOST(String path, String reqPayload) {
+        return  performPOST(path, reqPayload)
+                .doOnError(t -> System.err.println("Failed requesting server: " + t.getMessage()))
+                .block();
+    }
+
+    @Override
+    public CompletableFuture<String> nonblockingGET(String path) {
+        final CompletableFuture<String> cfResponse = new CompletableFuture<>();
+
+        performGET(path)
+                .doOnError(t -> cfResponse.completeExceptionally(t))
+                .subscribe(res -> cfResponse.complete(res),
+                        null,
+                        null);
+
+        return cfResponse;
+    }
+
+    @Override
+    public CompletableFuture<String> nonblockingPOST(String path, String reqPayload) {
+        final CompletableFuture<String> cfResponse = new CompletableFuture<>();
+
+        performPOST(path, reqPayload)
+                .doOnError(t -> cfResponse.completeExceptionally(t))
+                .subscribe(res -> cfResponse.complete(res),
+                        null,
+                        null);
+
+        return cfResponse;
+    }
+
+    private Mono<String> performGET(String path) {
         reactor.netty.http.client.HttpClient.RequestSender requestSender = client
                 .request(HttpMethod.GET)
                 .uri(path);
@@ -41,77 +80,21 @@ public class Engine implements HttpClientEngine {
                     }
                     return body;
                 })
-                .map(byteBuf -> byteBuf.toString(StandardCharsets.UTF_8))
-                .doOnError(t -> System.err.println("Failed requesting server: " + t.getMessage()))
-                .block();
+                .map(byteBuf -> byteBuf.toString(StandardCharsets.UTF_8));
     }
 
-    @Override
-    public String blockingPOST(String path, String body) {
-
+    private Mono<String> performPOST(String path, String reqPayload) {
         return  client
                 .headers(entries -> entries.add("Content-Type", "application/json" ))
                 .post()
                 .uri(path)
-                .send(ByteBufFlux.fromString(Flux.just(body)))
+                .send(ByteBufFlux.fromString(Flux.just(reqPayload)))
                 .responseSingle((res, responseBody) -> {
                     if (res.status().code() != 200) {
                         Mono.error(new RuntimeException("Unexpected response code : " + res.status().code()));
                     }
                     return responseBody;
                 })
-                .map(byteBuf -> byteBuf.toString(StandardCharsets.UTF_8))
-                .doOnError(t -> System.err.println("Failed requesting server: " + t.getMessage()))
-                .block();
+                .map(byteBuf -> byteBuf.toString(StandardCharsets.UTF_8));
     }
-
-    @Override
-    public CompletableFuture<String> nonblockingGET(String path) {
-        final CompletableFuture<String> cfResponse = new CompletableFuture<>();
-
-        reactor.netty.http.client.HttpClient.RequestSender requestSender = client
-                .request(HttpMethod.GET)
-                .uri(path);
-
-        requestSender
-                .responseSingle((res, body) -> {
-                    if (res.status().code() != 200) {
-                        Mono.error(new RuntimeException("Unexpected response code : " + res.status().code()));
-                    }
-                    return body;
-                })
-                .map(byteBuf -> byteBuf.toString(StandardCharsets.UTF_8))
-                .doOnError(t -> cfResponse.completeExceptionally(t))
-                .subscribe(res -> cfResponse.complete(res),
-                        null,
-                        null);
-
-        return cfResponse;
-    }
-
-    @Override
-    public CompletableFuture<String> nonblockingPOST(String path, String body) {
-        final CompletableFuture<String> cfResponse = new CompletableFuture<>();
-
-        reactor.netty.http.client.HttpClient.ResponseReceiver<?> requestSender = client
-                .post()
-                .uri(path)
-                .send(ByteBufFlux.fromString(Flux.just(body)));
-
-        requestSender
-                .responseSingle((res, resBody) -> {
-                    if (res.status().code() != 200) {
-                        Mono.error(new RuntimeException("Unexpected response code : " + res.status().code()));
-                    }
-                    return resBody;
-                })
-                .map(byteBuf -> byteBuf.toString(StandardCharsets.UTF_8))
-                .doOnError(t -> cfResponse.completeExceptionally(t))
-                .subscribe(res -> cfResponse.complete(res),
-                        null,
-                        null);
-
-        return cfResponse;
-    }
-
 }
