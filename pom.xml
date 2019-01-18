@@ -23,6 +23,7 @@
         <module>apacheasync-benchmark</module>
         <module>apachesync-benchmark</module>
         <module>asynchttpclient-benchmark</module>
+        <module>springwebclient-benchmark</module>
         <module>gatling-stress</module>
         <module>docker-app</module>
         <module>reporter</module>
