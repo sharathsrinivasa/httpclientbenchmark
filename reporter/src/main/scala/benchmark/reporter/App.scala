@@ -104,9 +104,11 @@ object App {
     s"""
 <table>
   <th>Client</th>${headers.map { h => s"<th>$h</th>"  }.mkString("") }
-    ${data.map { case (client, data) =>
-      s"<tr><td>$client</td>${data.map {d => s"<td align=right>${tryFormat(d)}</td>"}.mkString("")}</tr>"
-    }.mkString("\n")}
+    ${data
+      .sortBy { case (client, _) => client }
+      .map { case (client, data) =>
+        s"<tr><td>$client</td>${data.map {d => s"<td align=right>${tryFormat(d)}</td>"}.mkString("")}</tr>"
+      }.mkString("\n")}
 </table>
 """.stripMargin
   }
