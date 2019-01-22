@@ -51,6 +51,12 @@
         </dependency>
         <dependency>
             <groupId>com.ss.benchmark</groupId>
+            <artifactId>springwebclient-benchmark</artifactId>
+            <version>${project.version}</version>
+            <classifier>jar-with-dependencies</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.ss.benchmark</groupId>
             <artifactId>reporter</artifactId>
             <version>${project.version}</version>
             <classifier>jar-with-dependencies</classifier>
